@@ -1,4 +1,4 @@
-package com.nobot.plugin.draw;
+package com.nobot.tool;
 
 import org.jdom2.Document;
 import org.jdom2.output.Format;
@@ -8,15 +8,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class xmlWriter
+public class XmlWriter
 {
-	private XMLOutputter xmlOutputter=new XMLOutputter(Format.getCompactFormat().setEncoding("UTF-8").setIndent("\t"));
-	File file;
-	xmlWriter(File file)
-	{
-		this.file=file;
-	}
-	public void write(Document document)
+	private final XMLOutputter xmlOutputter=new XMLOutputter(Format.getCompactFormat().setEncoding("UTF-8").setIndent("\t"));
+	public void write(File file,Document document)
 	{
 		try
 		{

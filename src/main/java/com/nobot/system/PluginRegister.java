@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 public class PluginRegister implements Loader
@@ -24,21 +25,20 @@ public class PluginRegister implements Loader
 	{
 		for (Map.Entry<String,LoadItem> entry:map.entrySet())
 		{
-			Class clazz=entry.getValue().getType();
-			CreateDir createDir=(CreateDir) clazz.getAnnotation(CreateDir.class);
+			Class<?> clazz=entry.getValue().getType();
+			CreateDir createDir=clazz.getAnnotation(CreateDir.class);
 			if(createDir!=null)
 				for(String file:createDir.value())
 					createFile(file);
-			CreateFile createFile=(CreateFile) clazz.getAnnotation(CreateFile.class);
+			CreateFile createFile= clazz.getAnnotation(CreateFile.class);
 			if(createFile!=null)
 				for (String file:createFile.value())
 					createDir(file);
 			ArrayList<UnzipFile> unzipFiles =new ArrayList<>();
-			UnzipFileList unzipFileList =(UnzipFileList) clazz.getAnnotation(UnzipFileList.class);
+			UnzipFileList unzipFileList = clazz.getAnnotation(UnzipFileList.class);
 			if(unzipFileList !=null)
-				for (UnzipFile unzipFile : unzipFileList.value())
-					unzipFiles.add(unzipFile);
-			UnzipFile unzipFile =(UnzipFile) clazz.getAnnotation(UnzipFile.class);
+				Collections.addAll(unzipFiles, unzipFileList.value());
+			UnzipFile unzipFile = clazz.getAnnotation(UnzipFile.class);
 			if(unzipFile !=null)
 				unzipFiles.add(unzipFile);
 			for (UnzipFile s: unzipFiles)
@@ -59,10 +59,7 @@ public class PluginRegister implements Loader
 		File file=new File(s);
 		if(file.exists())
 		{
-			if(file.isFile())
-				return true;
-			else
-				return false;
+			return file.isFile();
 		}
 		try
 		{
@@ -78,10 +75,7 @@ public class PluginRegister implements Loader
 		File file=new File(s);
 		if(file.exists())
 		{
-			if(file.isDirectory())
-				return true;
-			else
-				return false;
+			return file.isDirectory();
 		}
 		return file.mkdirs();
 	}

@@ -4,7 +4,6 @@ import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.JobCenter;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
-import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.controller.BotActionContext;
 import com.icecreamqaq.yuq.entity.Group;
@@ -14,6 +13,7 @@ import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.nobot.plugin.girlFriend.entity.Girl;
 import com.nobot.plugin.girlFriend.entity.Master;
 import com.nobot.plugin.girlFriend.service.Service;
+import com.nobot.system.annotation.CreateDir;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -21,6 +21,7 @@ import java.util.Random;
 
 @GroupController
 @JobCenter
+@CreateDir(GirlPool.GIRL_POOL)
 public class Controller
 {
 	Random random=new Random();
@@ -29,9 +30,6 @@ public class Controller
 
 	@Inject
 	private MessageItemFactory factory;
-
-	@Inject
-	private YuQ yuQ;
 
 	@Before(except = {"open","simulateDrawGirl "})
 	public void getInfo(Member qq, BotActionContext actionContext)
@@ -142,7 +140,7 @@ public class Controller
 		StringBuilder builder=new StringBuilder("目前有：");
 		for (Map.Entry<String,Integer> entry:map.entrySet())
 		{
-			builder.append(entry.getKey()+"\t"+entry.getValue()+"\r\n");
+			builder.append(entry.getKey()).append("\t").append(entry.getValue()).append("\r\n");
 		}
 		return new Message().plus(builder.toString());
 	}
@@ -173,7 +171,6 @@ public class Controller
 		Master me=service.getMaster(qq.getId(), qq.getGroup().getId());
 		if(num>me.getGold())
 			return new Message().plus("你没有这么多钱");
-		Master sb=service.getMaster(at.getId(), at.getGroup().getId());
 		service.addGold(qq.getId(),qq.getGroup().getId(),-num);
 		service.addGold(at.getId(),at.getGroup().getId(),num);
 		return new Message().plus("成功转账"+num);

@@ -4,6 +4,8 @@ import java.util.regex.Pattern;
 
 interface ConstantPool
 {
+	String drawPool="DrawPool";
+
 	String p_read=".*&\\[(.+?):(.+?)\\]#.*";
 	String p_image="img";
 	String p_r="r";

@@ -205,7 +205,6 @@ public class BlackJack
 			else
 				message.plus("\r\n下回合 你自己");
 
-			return message;
 		}
 		else
 		{
@@ -236,8 +235,8 @@ public class BlackJack
 			else
 				message.plus("\r\n下回合 你自己");
 
-			return message;
 		}
+		return message;
 	}
 
 	@Action("停止")

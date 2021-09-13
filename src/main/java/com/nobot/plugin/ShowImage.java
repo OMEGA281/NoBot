@@ -7,7 +7,6 @@ import com.IceCreamQAQ.Yu.event.events.AppStartEvent;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.PrivateController;
 import com.icecreamqaq.yuq.entity.Contact;
-import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.nobot.system.annotation.CreateDir;
@@ -59,8 +58,6 @@ public class ShowImage
 				list.addAll(getImageFile(file));
 			else if(file.getName().endsWith(".jpg")||file.getName().endsWith(".png")||file.getName().endsWith(".bpm"))
 				list.add(file);
-			else
-				continue;
 		}
 		return list;
 	}
