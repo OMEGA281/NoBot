@@ -29,11 +29,11 @@ public class PluginRegister implements Loader
 			CreateDir createDir=clazz.getAnnotation(CreateDir.class);
 			if(createDir!=null)
 				for(String file:createDir.value())
-					createFile(file);
+					createDir(file);
 			CreateFile createFile= clazz.getAnnotation(CreateFile.class);
 			if(createFile!=null)
 				for (String file:createFile.value())
-					createDir(file);
+					createFile(file);
 			ArrayList<UnzipFile> unzipFiles =new ArrayList<>();
 			UnzipFileList unzipFileList = clazz.getAnnotation(UnzipFileList.class);
 			if(unzipFileList !=null)
