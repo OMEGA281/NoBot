@@ -10,7 +10,8 @@ import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.message.Image;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
-import com.nobot.system.RegisterWindow;
+import com.nobot.system.annotation.CreateDir;
+import lombok.NonNull;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -19,40 +20,48 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@EventListener
 @GroupController
 @PrivateController
-public class ShowImage implements RegisterWindow
+@EventListener
+@CreateDir("Image")
+public class ShowImage
 {
 	File imageFileDir=new File("Image");
+
+	List<File> imageList;
+
+	Random random;
 
 	@Inject
 	private MessageItemFactory factory;
 
-	@Action(".image")
-	public Object image(Message message, Contact qq) throws IOException
+	@Event
+	public void initList(AppStartEvent event)
 	{
-//		List<File> list=new ArrayList<>();
-//		if(!imageFileDir.exists()||imageFileDir.isFile())
-//			return "无法寻找到图片库";
-//		for(String dir:dirList)
-//		{
-//			File file=new File(imageFileDir.getAbsolutePath()+"\\"+dir);
-//			for (File f:file.listFiles())
-//				list.add(f);
-//		}
-//
-//		Random random=new Random();
-//		File file=list.get(random.nextInt(list.size()));
-//		Image image=factory.imageByFile(file);
-//
-//		return image;
-		return null;
+		imageList=getImageFile(imageFileDir);
+		random=new Random();
 	}
 
-	@Override
-	public void onStart()
+	@Action(".image")
+	public Message image(Message message, Contact qq) throws IOException
 	{
+		if (imageList==null||imageList.isEmpty())
+			return new Message().plus("图片库不存在图片");
+		return new Message().plus(factory.imageByFile(imageList.get(random.nextInt(imageList.size()))));
+	}
 
+	public List<File> getImageFile(@NonNull File dir)
+	{
+		ArrayList<File> list=new ArrayList<>();
+		for(File file:dir.listFiles())
+		{
+			if(file.isDirectory())
+				list.addAll(getImageFile(file));
+			else if(file.getName().endsWith(".jpg")||file.getName().endsWith(".png")||file.getName().endsWith(".bpm"))
+				list.add(file);
+			else
+				continue;
+		}
+		return list;
 	}
 }

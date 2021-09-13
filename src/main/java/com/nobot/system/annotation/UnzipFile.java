@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @LoadBy(PluginRegister.class)
-public @interface UnzipFileOrDir
+public @interface UnzipFile
 {
 	/**
 	 * 文件名称
