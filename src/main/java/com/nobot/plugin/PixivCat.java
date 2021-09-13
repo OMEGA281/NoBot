@@ -14,6 +14,8 @@ import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.icecreamqaq.yuq.message.MessageLineQ;
 import com.nobot.system.annotation.CreateDir;
 import com.nobot.tool.FileUtils;
+import net.coobird.thumbnailator.Thumbnailator;
+import net.coobird.thumbnailator.Thumbnails;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -23,6 +25,7 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,7 +87,7 @@ public class PixivCat
 		}
 
 		File tmpFile=new File("PixivCatTmp\\"+num+".jpg");
-		fileUtils.write(tmpFile,inputStream);
+		dealImage(inputStream,tmpFile);
 		MessageLineQ messageLineQ=new Message().lineQ();
 		if(group!=null)
 			messageLineQ.at(qq.getId());
@@ -95,6 +98,11 @@ public class PixivCat
 			qq.sendMessage(messageLineQ);
 		tmpFile.delete();
 		return null;
+	}
+
+	public void dealImage(InputStream inputStream,File file) throws IOException
+	{
+		Thumbnails.of(inputStream).size(3000,3000).toFile(file);
 	}
 
 	@Catch(error = IOException.class)
