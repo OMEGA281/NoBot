@@ -58,7 +58,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.nobot.Starter.main</mainClass>
+                            <mainClass>com.nobot.Starter</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
