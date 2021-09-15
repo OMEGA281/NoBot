@@ -87,7 +87,7 @@ public class PixivCat
 		}
 
 		File tmpFile=new File("PixivCatTmp\\"+num+".jpg");
-		dealImage(inputStream,tmpFile);
+		dealImage(image,tmpFile);
 		MessageLineQ messageLineQ=new Message().lineQ();
 		if(group!=null)
 			messageLineQ.at(qq.getId());
@@ -100,9 +100,9 @@ public class PixivCat
 		return null;
 	}
 
-	public void dealImage(InputStream inputStream,File file) throws IOException
+	public void dealImage(BufferedImage image,File file) throws IOException
 	{
-		Thumbnails.of(inputStream).size(3000,3000).toFile(file);
+		Thumbnails.of(image).size(3000,3000).toFile(file);
 	}
 
 	@Catch(error = IOException.class)

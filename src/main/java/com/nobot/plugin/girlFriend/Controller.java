@@ -31,7 +31,7 @@ public class Controller
 	@Inject
 	private MessageItemFactory factory;
 
-	@Before(except = {"open","simulateDrawGirl "})
+	@Before(except = {"open","simulateDrawGirl"})
 	public void getInfo(Member qq, BotActionContext actionContext)
 	{
 		Master master= service.getMaster(qq.getId(),qq.getGroup().getId());

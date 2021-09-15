@@ -51,7 +51,7 @@ public class Controller
 	public void init(AppStartEvent event)
 	{
 		File pool=new File(ConstantPool.drawPool);
-		for (File file:pool.listFiles((dir, name) -> name.equals("xml")))
+		for (File file:pool.listFiles((dir, name) -> name.endsWith("xml")))
 		{
 			try
 			{
@@ -67,26 +67,26 @@ public class Controller
 	}
 
 	@Before
-	public void getUserInfo(BotActionContext botActionContext, Group group, Friend sender,Contact qq)
+	public void getUserInfo(BotActionContext actionContext, Group group, Friend sender,Contact qq)
 	{
 		if(sender!=null)
 		{
-			botActionContext.set("isGroup", false);
-			botActionContext.set("userName",sender.getName());
-			botActionContext.set("myName", MyInfo.myName);
+			actionContext.set("isGroup", false);
+			actionContext.set("userName",sender.getName());
+			actionContext.set("myName", MyInfo.myName);
 		}
-		else if(botActionContext.getSource() instanceof Member)
+		else if(actionContext.getSource() instanceof Member)
 		{
-			botActionContext.set("isGroup", false);
-			botActionContext.set("userName",qq.getName());
-			botActionContext.set("myName", MyInfo.myName);
+			actionContext.set("isGroup", false);
+			actionContext.set("userName",qq.getName());
+			actionContext.set("myName", MyInfo.myName);
 		}
 		else
 		{
-			botActionContext.set("isGroup", true);
+			actionContext.set("isGroup", true);
 			Member member=(Member)qq;
-			botActionContext.set("userName",member.getNameCard().isEmpty()?member.getName():member.getNameCard());
-			botActionContext.set("myName",
+			actionContext.set("userName",member.getNameCard().isEmpty()?member.getName():member.getNameCard());
+			actionContext.set("myName",
 					group.getBot().getNameCard().isEmpty()?MyInfo.myName:group.getBot().getNameCard());
 		}
 	}
