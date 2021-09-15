@@ -1,7 +1,6 @@
 package com.nobot.system;
 
 import com.IceCreamQAQ.Yu.annotation.Event;
-import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.icecreamqaq.yuq.event.GroupMessageEvent;
 import com.icecreamqaq.yuq.message.At;
 import com.icecreamqaq.yuq.message.MessageItem;
@@ -35,7 +34,7 @@ public class Classifier
 				cancel = true;
 				break;
 			}
-			if(at.getUser()==MyInfo.myQQNum)
+			if(at.getUser()== BotInfo.myQQNum)
 				cancel = false;
 		}
 		event.setCancel(cancel);

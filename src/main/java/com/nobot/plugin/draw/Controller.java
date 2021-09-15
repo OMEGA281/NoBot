@@ -10,7 +10,7 @@ import com.icecreamqaq.yuq.entity.Friend;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
-import com.nobot.system.MyInfo;
+import com.nobot.system.BotInfo;
 import com.nobot.system.annotation.CreateDir;
 import com.nobot.tool.XmlReader;
 import lombok.Getter;
@@ -35,7 +35,7 @@ public class Controller
 		String cardName;
 		NoCardException(String cardName)
 		{
-			this.cardName=cardName;
+			this.cardName = cardName;
 		}
 	}
 
@@ -45,13 +45,16 @@ public class Controller
 	@Inject
 	Draw draw;
 
-	Map<String,Card> map=new HashMap<>();
+	@Inject
+	ExtraInfoGetter extraInfoGetter;
+
+	Map<String, Card> map = new HashMap<>();
 
 	@Event
 	public void init(AppStartEvent event)
 	{
-		File pool=new File(ConstantPool.drawPool);
-		for (File file:pool.listFiles((dir, name) -> name.endsWith("xml")))
+		File pool = new File(ConstantPool.drawPool);
+		for (File file : pool.listFiles((dir, name) -> name.endsWith("xml")))
 		{
 			try
 			{
@@ -72,40 +75,42 @@ public class Controller
 		if(sender!=null)
 		{
 			actionContext.set("isGroup", false);
-			actionContext.set("userName",sender.getName());
-			actionContext.set("myName", MyInfo.myName);
+			actionContext.set("userName", sender.getName());
+			actionContext.set("myName", BotInfo.myName);
 		}
 		else if(actionContext.getSource() instanceof Member)
 		{
 			actionContext.set("isGroup", false);
-			actionContext.set("userName",qq.getName());
-			actionContext.set("myName", MyInfo.myName);
+			actionContext.set("userName", qq.getName());
+			actionContext.set("myName", BotInfo.myName);
 		}
 		else
 		{
 			actionContext.set("isGroup", true);
 			Member member=(Member)qq;
-			actionContext.set("userName",member.getNameCard().isEmpty()?member.getName():member.getNameCard());
+			actionContext.set("userName", member.getNameCard().isEmpty() ? member.getName() : member.getNameCard());
 			actionContext.set("myName",
-					group.getBot().getNameCard().isEmpty()?MyInfo.myName:group.getBot().getNameCard());
+					group.getBot().getNameCard().isEmpty() ? BotInfo.myName : group.getBot().getNameCard());
 		}
 	}
 
 	@Action("抽牌 {cardName} {t_num}次")
-	public Message drawCard(String cardName,String t_num,boolean isGroup,String userName,String myName)
+	public Message drawCard(String cardName, String t_num, boolean isGroup, String userName, String myName,
+							long group, long qq)
 	{
-		int num=Integer.parseInt(t_num);
-		Card card=map.get(cardName);
-		if(card==null)
+		int num = Integer.parseInt(t_num);
+		Card card = map.get(cardName);
+		if (card == null)
 			throw new NoCardException(cardName);
-		String s=draw.draw(card,num);
-		return new Message().plus(s);
+		String s = draw.draw(card, num);
+		Message message = extraInfoGetter.transToMessage(s, group, qq);
+		return message;
 	}
 
 	@Action("抽牌 {cardName}")
-	public Message drawCard(String cardName,boolean isGroup,String userName,String myName)
+	public Message drawCard(String cardName, boolean isGroup, String userName, String myName, long group, long qq)
 	{
-		return drawCard(cardName,"1",isGroup,userName,myName);
+		return drawCard(cardName, "1", isGroup, userName, myName, group, qq);
 	}
 
 	@Catch(error = NumberFormatException.class)

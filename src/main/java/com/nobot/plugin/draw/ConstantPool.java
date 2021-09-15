@@ -6,10 +6,12 @@ interface ConstantPool
 {
 	String drawPool="DrawPool";
 
-	String p_read=".*&\\[(.+?):(.+?)\\]#.*";
-	String p_image="img";
-	String p_r="r";
-	String p_split=":";
+	String specialWord ="&\\[(.+?)[:：](.+?)\\]#";
+	String specialWord_image ="img";
+	String specialWord_r ="r";
+	String specialWord_name ="name";
+	String specialWord_at ="at";
+	String specialWord_split =":";
 
 	String p_accessoryLibrary="\\{(.+?)(:(.+?))?\\}";
 
@@ -20,7 +22,7 @@ interface ConstantPool
 	 * 包含范式：
 	 * ①
 	 */
-	Pattern sp_pattern =Pattern.compile(p_read);
+	Pattern specialWord_pattern =Pattern.compile(specialWord);
 	Pattern pattern_accessoryLibrary=Pattern.compile(p_accessoryLibrary);
 	Pattern pattern_include=Pattern.compile(p_include);
 	Pattern pattern_exclude=Pattern.compile(p_exclude);
@@ -32,8 +34,4 @@ interface ConstantPool
 	String text_subLib ="sub";
 	String attr_tag="tag";
 	String attr_num="num";
-
-	String sp_name="@name#";
-	String sp_at="@at#";
-	String sp_me="@me#";
 }

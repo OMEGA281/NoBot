@@ -74,7 +74,7 @@ public class Dice
 	 * @param s 投掷随机数表达式
 	 * @return
 	 */
-	private String getTrueExpression(String s)
+	public String getTrueExpression(String s)
 	{
 		Pattern pattern=Pattern.compile("\\d*[dD]\\d*");
 		Matcher matcher=pattern.matcher(s);
@@ -92,7 +92,7 @@ public class Dice
 	 * @param expression 式子
 	 * @return
 	 */
-	private int getResult(String expression)
+	public int getResult(String expression)
 	{
 		String s=getTrueExpression(expression);
 		int result=-1000;
