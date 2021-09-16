@@ -3,6 +3,7 @@ package com.nobot.plugin.dice;
 import net.sourceforge.jeval.EvaluationException;
 import net.sourceforge.jeval.Evaluator;
 
+import javax.inject.Inject;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +13,7 @@ public class Dice
 	private Random random;
 	private Evaluator evaluator;
 
-	Dice()
+	public Dice()
 	{
 		random=new Random();
 		evaluator=new Evaluator();

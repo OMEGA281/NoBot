@@ -94,21 +94,21 @@ public class Controller
 		}
 	}
 
-	@Action("抽牌 {cardName} {t_num}次")
+	@Action(value = "{t_num}次抽{cardName}")
 	public Message drawCard(String cardName, String t_num, boolean isGroup, String userName, String myName,
-							long group, long qq)
+							Group group, long qq)
 	{
 		int num = Integer.parseInt(t_num);
 		Card card = map.get(cardName);
 		if (card == null)
 			throw new NoCardException(cardName);
 		String s = draw.draw(card, num);
-		Message message = extraInfoGetter.transToMessage(s, group, qq);
+		Message message = extraInfoGetter.transToMessage(s, isGroup?group.getId():0, qq);
 		return message;
 	}
 
-	@Action("抽牌 {cardName}")
-	public Message drawCard(String cardName, boolean isGroup, String userName, String myName, long group, long qq)
+	@Action(value = "抽{cardName}")
+	public Message drawCard(String cardName, boolean isGroup, String userName, String myName, Group group, long qq)
 	{
 		return drawCard(cardName, "1", isGroup, userName, myName, group, qq);
 	}

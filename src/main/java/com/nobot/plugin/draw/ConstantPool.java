@@ -6,8 +6,8 @@ interface ConstantPool
 {
 	String drawPool="DrawPool";
 
-	String specialWord ="&\\[(.+?)[:：](.+?)\\]#";
-	String specialWord_image ="img";
+	String specialWord ="\\$\\[(.+?)[:：](.+?)\\]#";
+	String specialWord_image ="image";
 	String specialWord_r ="r";
 	String specialWord_name ="name";
 	String specialWord_at ="at";

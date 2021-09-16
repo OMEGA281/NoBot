@@ -49,10 +49,10 @@ public class Draw implements ConstantPool
 			}
 
 			String sub = getSubLib(card, libList, includeTagList, excludeTagList);
-			String deal = doLine(card, sub, iterationTime);
+			String deal = doLine(card, sub, iterationTime).replaceAll("\\$","RDS_CHAR_DOLLAR");
 
 
-			result = matcher.replaceFirst(deal);
+			result = matcher.replaceFirst(deal).replaceAll("RDS_CHAR_DOLLAR","\\$");
 			matcher = pattern_accessoryLibrary.matcher(result);
 		}
 		return result;

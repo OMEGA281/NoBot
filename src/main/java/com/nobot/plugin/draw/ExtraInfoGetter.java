@@ -34,7 +34,7 @@ public class ExtraInfoGetter implements ConstantPool
 		ArrayList<String> stringList=new ArrayList<>();
 		for (int i=0;i<index.size()-1;i++)
 		{
-			String part=s.substring(index.indexOf(i),index.indexOf(i+1));
+			String part=s.substring(index.get(i),index.get(i+1));
 			if(!part.isEmpty())
 				stringList.add(part);
 		}
@@ -42,7 +42,7 @@ public class ExtraInfoGetter implements ConstantPool
 	}
 	private MessageItem replaceString(String s,long groupNum,long senderNum)
 	{
-		if(!(s.startsWith("&")&&s.endsWith("#")))
+		if(!(s.startsWith("$")&&s.endsWith("#")))
 			return factory.text(s);
 		String command=s.substring(2,s.length()-2);
 		String[] ps=command.split(":|：");
