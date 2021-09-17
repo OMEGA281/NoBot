@@ -10,6 +10,7 @@ import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.nobot.system.annotation.CreateDir;
+import com.nobot.tool.ImageCompressor;
 import lombok.NonNull;
 
 import javax.inject.Inject;
@@ -46,7 +47,8 @@ public class ShowImage
 	{
 		if (imageList==null||imageList.isEmpty())
 			return new Message().plus("图片库不存在图片");
-		return new Message().plus(factory.imageByFile(imageList.get(random.nextInt(imageList.size()))));
+		File file=imageList.get(random.nextInt(imageList.size()));
+		return new Message().plus(factory.imageByFile(file));
 	}
 
 	public List<File> getImageFile(@NonNull File dir)
