@@ -362,6 +362,7 @@ public class Service implements GirlPool
 		masterDAO.saveOrUpdate(master);
 	}
 
+	@Transactional
 	public Map<String,Integer> listForSaleGirl(long groupNum)
 	{
 		MyGroup group=groupDAO.findById(groupNum);
@@ -378,6 +379,7 @@ public class Service implements GirlPool
 		return map;
 	}
 
+	@Transactional
 	public Master getMaster(long userNum,long groupNum)
 	{
 		return masterDAO.findByGroupNumAndUserNum(groupNum,userNum);

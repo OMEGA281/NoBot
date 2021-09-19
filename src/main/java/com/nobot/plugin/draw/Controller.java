@@ -10,6 +10,7 @@ import com.icecreamqaq.yuq.entity.Friend;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageLineQ;
 import com.nobot.system.BotInfo;
 import com.nobot.system.annotation.CreateDir;
 import com.nobot.tool.XmlReader;
@@ -51,7 +52,12 @@ public class Controller
 	Map<String, Card> map = new HashMap<>();
 
 	@Event
-	public void init(AppStartEvent event)
+	public void startLoadDrawPool(AppStartEvent event)
+	{
+		refreshDrawPool();
+	}
+
+	public void refreshDrawPool()
 	{
 		File pool = new File(ConstantPool.drawPool);
 		for (File file : pool.listFiles((dir, name) -> name.endsWith("xml")))
@@ -111,6 +117,14 @@ public class Controller
 	public Message drawCard(String cardName, boolean isGroup, String userName, String myName, Group group, long qq)
 	{
 		return drawCard(cardName, "1", isGroup, userName, myName, group, qq);
+	}
+
+	@Action("更新抽牌库")
+	public Message hotRenewalDrawPool()
+	{
+		map.clear();
+		refreshDrawPool();
+		return new Message().plus("更新完毕，共获得"+map.size()+"个图库");
 	}
 
 	@Catch(error = NumberFormatException.class)
