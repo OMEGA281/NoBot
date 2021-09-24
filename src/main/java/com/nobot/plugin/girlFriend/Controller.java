@@ -12,10 +12,16 @@ import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.nobot.plugin.girlFriend.entity.Girl;
 import com.nobot.plugin.girlFriend.entity.Master;
+import com.nobot.plugin.girlFriend.service.ImageGenerationService;
 import com.nobot.plugin.girlFriend.service.Service;
 import com.nobot.system.annotation.CreateDir;
+import net.coobird.thumbnailator.Thumbnails;
 
 import javax.inject.Inject;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -30,6 +36,9 @@ public class Controller
 
 	@Inject
 	private MessageItemFactory factory;
+
+	@Inject
+	private ImageGenerationService imageGenerationService;
 
 	@Before(except = {"open","simulateDrawGirl"})
 	public void getInfo(Member qq, BotActionContext actionContext)
@@ -90,26 +99,30 @@ public class Controller
 	}
 
 	@Action("我的状态")
-	public Message myInfo(Member qq)
+	public void myInfo(Member qq) throws IOException
 	{
 		Master master= service.getMaster(qq.getId(),qq.getGroup().getId());
 		Message message=new Message();
 		message.plus("金币："+master.getGold()+"\r\n");
 		message.plus("亲密度："+master.getActive()+"\r\n");
 		message.plus("我的老婆："+"\r\n");
-		boolean showImage=true;
-		if(master.getGirlList().size()>5)
-			showImage=false;
+		Map<String, File> map=new HashMap<>();
 		for (Girl girl:master.getGirlList())
 		{
-			message.plus(girl.getName());
-			if(girl.getSaleNum()>=0)
-				message.plus("（代售："+girl.getSaleNum()+"）");
-			if (showImage)
-				message.plus(factory.imageByFile(service.getGirlImage(girl.getName())));
-			message.plus("\r\n");
+			File file=service.getGirlImage(girl.getName());
+			map.put(girl.getName(),file);
 		}
-		return message;
+		BufferedImage image= imageGenerationService.makeImage(map);
+		if(image==null)
+		{
+			qq.getGroup().sendMessage(message);
+			return;
+		}
+		File tmpFile=new File("tmp"+qq.getGroup().getId()+qq.getId()+".jpg");
+		Thumbnails.of(image).size(3000,3000).outputFormat("jpg").toFile(tmpFile);
+		message.plus(factory.imageByFile(tmpFile));
+		qq.getGroup().sendMessage(message);
+		tmpFile.delete();
 	}
 
 	@Action("卖老婆 {name} {num}")
@@ -194,5 +207,31 @@ public class Controller
 		int gold=5+ random.nextInt(11);
 		service.addGold(qq.getId(), qq.getGroup().getId(),gold);
 		return new Message().plus("你残忍的分解了"+name+"获得了"+gold+"金币");
+	}
+	@Action("查老婆 {name}")
+	public Message findWife(Member qq,String name)
+	{
+		Girl girl=service.findWife(qq.getGroup().getId(),name);
+		if(girl==null)
+		{
+			File file=service.getGirlImage(name);
+			if (file==null)
+				return new Message().plus("不存在这个老婆哦");
+			else
+				return new Message().plus(factory.imageByFile(file)).plus(name+"还没有主人");
+		}
+		Master master=girl.getMaster();
+		if(master==null)
+			return new Message().plus(factory.imageByFile(service.getGirlImage(name))).plus(name+"还没有主人");
+		else
+			return new Message().plus(factory.imageByFile(service.getGirlImage(name)))
+					.plus(name+"的主人是").plus(qq.getGroup().get(master.getUserNum()).getName())
+					.plus("（").plus(Long.toString(master.getGroupNum())).plus("）");
+	}
+	@Action("群老婆状态")
+	public Message groupWifeStates(long group)
+	{
+		return new Message().plus("共有"+service.listGirl().size()+"位老婆")
+				.plus("其中"+service.countGroupWife(group)+"位有了主人");
 	}
 }

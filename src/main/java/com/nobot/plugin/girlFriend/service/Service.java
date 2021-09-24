@@ -380,6 +380,18 @@ public class Service implements GirlPool
 	}
 
 	@Transactional
+	public int countGroupWife(long groupNum)
+	{
+		MyGroup group=groupDAO.findById(groupNum);
+		List<Girl> girlList=group.getGirlList();
+		int i=0;
+		for (Girl girl:girlList)
+			if (girl.getMaster()!=null)
+				i++;
+		return i;
+	}
+
+	@Transactional
 	public Master getMaster(long userNum,long groupNum)
 	{
 		return masterDAO.findByGroupNumAndUserNum(groupNum,userNum);

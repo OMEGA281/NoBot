@@ -28,11 +28,12 @@ public class Draw implements ConstantPool
 
 			ArrayList<String> includeTagList = new ArrayList<>();
 			ArrayList<String> excludeTagList = new ArrayList<>();
+
 			if (info != null)
 			{
 				Matcher include = pattern_include.matcher(info);
 				Matcher exclude = pattern_exclude.matcher(info);
-
+				Matcher have=pattern_have.matcher(info);
 
 				while (include.find())
 				{

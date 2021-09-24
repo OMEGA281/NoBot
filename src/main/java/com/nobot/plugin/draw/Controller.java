@@ -124,7 +124,7 @@ public class Controller
 	{
 		map.clear();
 		refreshDrawPool();
-		return new Message().plus("更新完毕，共获得"+map.size()+"个图库");
+		return new Message().plus("更新完毕，共获得"+map.size()+"个牌库");
 	}
 
 	@Catch(error = NumberFormatException.class)

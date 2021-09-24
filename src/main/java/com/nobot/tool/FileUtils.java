@@ -1,6 +1,7 @@
 package com.nobot.tool;
 
 import java.io.*;
+import java.nio.file.Files;
 
 public class FileUtils
 {
@@ -19,5 +20,18 @@ public class FileUtils
 		}
 		outputStream.close();
 		inputStream.close();
+	}
+
+	public static boolean copy(File from,File to,boolean cover) throws IOException
+	{
+		if(to.exists())
+		{
+			if (to.isDirectory())
+				return false;
+			else if (!cover)
+				return false;
+		}
+		Files.copy(from.toPath(),to.toPath());
+		return true;
 	}
 }
