@@ -119,6 +119,19 @@ public class Controller
 		return drawCard(cardName, "1", isGroup, userName, myName, group, qq);
 	}
 
+	@Action("查牌库")
+	public Message getDrawPool()
+	{
+		StringBuilder stringBuilder=new StringBuilder();
+		stringBuilder.append("当前有").append(map.size()).append("个牌库:\r\n");
+		for (String s:map.keySet())
+		{
+			stringBuilder.append(s).append("\r\n");
+		}
+		stringBuilder.delete(stringBuilder.length()-3,stringBuilder.length());
+		return new Message().plus(stringBuilder.toString());
+	}
+
 	@Action("更新抽牌库")
 	public Message hotRenewalDrawPool()
 	{

@@ -18,6 +18,7 @@ interface ConstantPool
 	String p_include="include=\\[(.*?)\\]";
 	String p_exclude="exclude=\\[(.*?)\\]";
 	String p_have="have=\\[(.*?)\\]";
+	String p_repeat="repeat=\\[(.*?)\\]";
 
 	/**
 	 * 包含范式：
@@ -28,6 +29,7 @@ interface ConstantPool
 	Pattern pattern_include=Pattern.compile(p_include);
 	Pattern pattern_exclude=Pattern.compile(p_exclude);
 	Pattern pattern_have=Pattern.compile(p_have);
+	Pattern pattern_repeat=Pattern.compile(p_repeat);
 
 	String text_author="author";
 	String text_help="help";

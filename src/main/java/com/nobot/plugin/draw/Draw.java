@@ -1,13 +1,18 @@
 package com.nobot.plugin.draw;
 
 
+import com.nobot.plugin.dice.Dice;
 import lombok.NonNull;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.regex.Matcher;
 
 public class Draw implements ConstantPool
 {
+	@Inject
+	Dice dice;
+
 	private final int indexSize = 0;
 	private final Map<Integer, Integer> index = new HashMap<>();
 
@@ -29,11 +34,13 @@ public class Draw implements ConstantPool
 			ArrayList<String> includeTagList = new ArrayList<>();
 			ArrayList<String> excludeTagList = new ArrayList<>();
 
+			int repeatNum = 1;
 			if (info != null)
 			{
 				Matcher include = pattern_include.matcher(info);
 				Matcher exclude = pattern_exclude.matcher(info);
 				Matcher have=pattern_have.matcher(info);
+				Matcher repeat=pattern_repeat.matcher(info);
 
 				while (include.find())
 				{
@@ -47,13 +54,28 @@ public class Draw implements ConstantPool
 					if (s != null && !s.isEmpty())
 						Collections.addAll(excludeTagList, s.split(",|，"));
 				}
+				while (repeat.find())
+				{
+					try
+					{
+						repeatNum=dice.getResult(dice.getTrueExpression(repeat.group(1)));
+					}
+					catch (Exception e)
+					{
+						repeatNum=1;
+					}
+
+				}
 			}
 
-			String sub = getSubLib(card, libList, includeTagList, excludeTagList);
-			String deal = doLine(card, sub, iterationTime).replaceAll("\\$","RDS_CHAR_DOLLAR");
-
-
-			result = matcher.replaceFirst(deal).replaceAll("RDS_CHAR_DOLLAR","\\$");
+			StringBuilder partResult=new StringBuilder();
+			for (int i=0;i<repeatNum;i++)
+			{
+				String sub = getSubLib(card, libList, includeTagList, excludeTagList);
+				String deal = doLine(card, sub, iterationTime).replaceAll("\\$","RDS_CHAR_DOLLAR");
+				partResult.append(deal);
+			}
+			result=matcher.replaceFirst(partResult.toString()).replaceAll("RDS_CHAR_DOLLAR","\\$");
 			matcher = pattern_accessoryLibrary.matcher(result);
 		}
 		return result;

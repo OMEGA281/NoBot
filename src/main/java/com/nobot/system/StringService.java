@@ -10,9 +10,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @CreateDir("string")
-public class StringLoader implements ApplicationService
+public class StringService implements ApplicationService
 {
 	private static Map<String, List<String>> map= new HashMap<>();
+	private Random random=new Random();
+
 	@Override
 	public void init()
 	{
@@ -23,6 +25,8 @@ public class StringLoader implements ApplicationService
 		File[] jarStringFiles=jarStringDir.listFiles((dir, name) -> name.endsWith("properties"));
 		File[] outsideStringFiles=outsideStringDir.listFiles((dir, name) -> name.endsWith("properties"));
 
+		if(jarStringFiles==null)
+			return;
 		//解压未被解压的文件
 		code_0:for(File jarFile:jarStringFiles)
 		{
@@ -90,4 +94,5 @@ public class StringLoader implements ApplicationService
 	{
 		return 0;
 	}
+
 }
