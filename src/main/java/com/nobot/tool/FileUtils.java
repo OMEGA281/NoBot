@@ -22,6 +22,19 @@ public class FileUtils
 		inputStream.close();
 	}
 
+	public String readAll(File file)throws IOException
+	{
+		if(!file.exists())
+			return null;
+		char[] chars=new char[50];
+		FileReader reader=new FileReader(file);
+		StringBuilder builder=new StringBuilder();
+		int len;
+		while ((len=reader.read(chars))>0)
+			builder.append(chars,0,len);
+		return builder.toString();
+	}
+
 	public static boolean copy(File from,File to,boolean cover) throws IOException
 	{
 		if(to.exists())

@@ -10,6 +10,7 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
+import com.icecreamqaq.yuq.message.MessageLineQ;
 import com.nobot.plugin.girlFriend.entity.Girl;
 import com.nobot.plugin.girlFriend.entity.Master;
 import com.nobot.plugin.girlFriend.service.ImageGenerationService;
@@ -129,7 +130,8 @@ public class Controller
 	public Message saleWife(Member qq, String name, String num)
 	{
 		int gold=Integer.parseInt(num);
-		boolean b=service.saleWife(qq.getId(),qq.getGroup().getId(),name, gold);
+		boolean b=service.saleWife(qq.getId(),qq.getGroup().getId(),
+				name.replaceAll("_"," "), gold);
 		if(b)
 			return new Message().plus("挂载出售了哦，可以使用\"撤回出售 {名字}\"来撤回");
 		else
@@ -139,7 +141,8 @@ public class Controller
 	@Action("撤回出售 {name}")
 	public Message saleWife(Member qq, String name)
 	{
-		boolean b=service.saleWife(qq.getId(),qq.getGroup().getId(),name, -1);
+		boolean b=service.saleWife(qq.getId(),qq.getGroup().getId(),
+				name.replaceAll("_"," "), -1);
 		if(b)
 			return new Message().plus("撤回出售了");
 		else
@@ -147,20 +150,35 @@ public class Controller
 	}
 
 	@Action("市场")
-	public Message market(Group group)
+	public void market(Group group,Member qq) throws IOException
 	{
+		int gold=service.getMaster(qq.getId(), group.getId()).getGold();
 		Map<String,Integer> map=service.listForSaleGirl(group.getId());
-		StringBuilder builder=new StringBuilder("目前有：");
+		MessageLineQ messageLineQ=new MessageLineQ(new Message());
+		messageLineQ.text(qq.getName()).text("有"+gold).text("g\r\n市场老婆如下：");
+		Map<String,File> stringFileMap=new HashMap<>();
 		for (Map.Entry<String,Integer> entry:map.entrySet())
 		{
-			builder.append(entry.getKey()).append("\t").append(entry.getValue()).append("\r\n");
+			File file=service.getGirlImage(entry.getKey());
+			stringFileMap.put(entry.getKey()+"[售价:"+entry.getValue()+"]",file);
 		}
-		return new Message().plus(builder.toString());
+		BufferedImage image= imageGenerationService.makeImage(stringFileMap);
+		if(image==null)
+		{
+			group.sendMessage(messageLineQ);
+			return;
+		}
+		File tmpFile=new File("tmp"+qq.getGroup().getId()+".jpg");
+		Thumbnails.of(image).size(3000,3000).outputFormat("jpg").toFile(tmpFile);
+		messageLineQ.imageByFile(tmpFile);
+		qq.getGroup().sendMessage(messageLineQ);
+		tmpFile.delete();
 	}
 
 	@Action("买老婆 {name}")
 	public Message buyWife(Member qq,String name)
 	{
+		name=name.replaceAll("_"," ");
 		Map<String,Integer> map=service.listForSaleGirl(qq.getGroup().getId());
 		if(!map.containsKey(name))
 			return new Message().plus("没有人售卖她哦");
@@ -191,6 +209,7 @@ public class Controller
 	@Action("分解 {name}")
 	public Message decompose(Member qq,String name)
 	{
+		name=name.replaceAll("_"," ");
 		Master master= service.getMaster(qq.getId(), qq.getGroup().getId());
 		boolean exist=false;
 		for(Girl girl:master.getGirlList())
@@ -211,6 +230,7 @@ public class Controller
 	@Action("查老婆 {name}")
 	public Message findWife(Member qq,String name)
 	{
+		name=name.replaceAll("_"," ");
 		Girl girl=service.findWife(qq.getGroup().getId(),name);
 		if(girl==null)
 		{
@@ -226,12 +246,24 @@ public class Controller
 		else
 			return new Message().plus(factory.imageByFile(service.getGirlImage(name)))
 					.plus(name+"的主人是").plus(qq.getGroup().get(master.getUserNum()).getName())
-					.plus("（").plus(Long.toString(master.getGroupNum())).plus("）");
+					.plus("（").plus(Long.toString(master.getUserNum())).plus("）");
 	}
 	@Action("群老婆状态")
 	public Message groupWifeStates(long group)
 	{
 		return new Message().plus("共有"+service.listGirl().size()+"位老婆")
 				.plus("其中"+service.countGroupWife(group)+"位有了主人");
+	}
+	@Action("!GM金币给予 {at} {gold}")
+	public Message GMSendMoney(long at,int gold,long SOPNum,Member qq)
+	{
+		if(SOPNum!=qq.getId())
+			return null;
+		if(at==-1)
+			for (long member:qq.getGroup().getMembers().keySet())
+				service.addGold(member,qq.getGroup().getId(),gold);
+		service.addGold(at,qq.getGroup().getId(),gold);
+		return new Message().plus("给予").plus(at==-1?"全体":Long.toString(at))
+				.plus(Integer.toString(gold)).plus("金币");
 	}
 }

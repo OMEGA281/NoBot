@@ -353,13 +353,16 @@ public class Service implements GirlPool
 	}
 
 	@Transactional
-	public void addGold(long userNum,long groupNum,int gold)
+	public boolean addGold(long userNum,long groupNum,int gold)
 	{
 		Master master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
+		if(master==null)
+			return false;
 		if(gold==0)
-			return;
+			return true;
 		master.setGold(master.getGold()+gold);
 		masterDAO.saveOrUpdate(master);
+		return true;
 	}
 
 	@Transactional

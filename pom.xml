@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.IceCreamQAQ.YuQ</groupId>
             <artifactId>YuQ-ArtQQ</artifactId>
-            <version>0.0.6.10-R50</version>
+            <version>0.0.6.10-R52</version>
         </dependency>
         <dependency>
             <groupId>com.IceCreamQAQ</groupId>
