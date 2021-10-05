@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--举例：
+    pattern="你要匹配的正则表达式" 后面的内容是触发后的回复，多条随机回复使用"|||"来隔开-->
+    <element pattern=".*早上好.*">你也早上好|||早上好欸！</element>
+</root>

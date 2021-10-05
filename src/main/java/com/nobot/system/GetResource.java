@@ -50,11 +50,12 @@ public class GetResource
 			return false;
 
 		File file = getOutsideResource(outSideFile);
-		if(file.exists()&&!cover)
+		if(file!=null&&!cover)
 			return false;
-
+		file=new File(outSideFile);
 		try
 		{
+			file.createNewFile();
 			byte[] bytes=new byte[1024];
 			FileOutputStream fileOutputStream=new FileOutputStream(file);
 			int len;
