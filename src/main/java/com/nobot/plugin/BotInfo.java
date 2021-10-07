@@ -73,7 +73,7 @@ public class BotInfo
 	{
 		MessageLineQ messageLineQ=new MessageLineQ(new Message());
 		messageLineQ.text("NoBot").text("-").text(version==null?"未知版本":version).text("\r\n")
-				.text("[").text("YuQ-ArtQQ:0.0.6.10-R50").text("\r\n")
+				.text("[").text("YuQ-ArtQQ:0.0.6.10-R52").text("\r\n")
 				.text("YuQ:0.1.0.0-DEV21").text("\r\n")
 				.text("Yu-Core:0.2.0.0-DEV13").text("]").text("\r\n")
 				.text(System.getProperty("os.name")).text("\\").text(System.getProperty("os.version")).text(" ")
@@ -101,13 +101,11 @@ public class BotInfo
 				.plus(System.getProperty("os.name")).plus(System.getProperty("os.version")).plus(" ")
 				.plus(System.getProperty("os.arch")).plus(" ").plus("jvm:").plus(System.getProperty("java.version"))
 				.plus("\r\n");
+//		读取自定义的提示语
 		String myInfo=fileUtils.readAll(getResource.getOutsideResource("botInfo.txt"));
 		if(myInfo!=null&&!myInfo.isEmpty())
-			message.plus(Message.Companion.toMessageByRainCode(myInfo));
+			return message.plus(Message.Companion.toMessageByRainCode(myInfo));
 		else
 			return message;
-		if(myInfo.contains("<Rain"))
-			return new Message().plus("^").plus(message);
-		return message;
 	}
 }

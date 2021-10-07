@@ -1,12 +1,11 @@
 package com.nobot.plugin.girlFriend;
 
-import com.IceCreamQAQ.Yu.annotation.Action;
-import com.IceCreamQAQ.Yu.annotation.Before;
-import com.IceCreamQAQ.Yu.annotation.Catch;
+import com.IceCreamQAQ.Yu.annotation.*;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.event.GroupMessageEvent;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.nobot.plugin.girlFriend.entity.Master;
@@ -21,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 @GroupController
+@EventListener
 public class BlackJack
 {
 	private enum MatchState
@@ -160,16 +160,21 @@ public class BlackJack
 		return match;
 	}
 
-	@Action("同意")
-	public Message deal(Member qq,Group group)
+	@Event
+	public void deal(GroupMessageEvent event)
 	{
+		if (!event.getMessage().getCodeStr().equals("同意"))
+			return;
+		Group group= event.getGroup();
+		Member qq= event.getSender();
 		Match match=map.get(group.getId());
 		if(match==null)
 			throw new DoNone();
 		if(match.opponent!= qq.getId())
 			throw new DoNone();
 		match.matchState= MatchState.ONGOING_INITIATOR;
-		return new Message().plus("对决开始，").plus(factory.at(match.initiator)).plus("的回合\r\n发送\"加牌\"或\"停止\"来控制");
+		group.sendMessage(new Message().plus("对决开始，")
+				.plus(factory.at(match.initiator)).plus("的回合\r\n发送\"加牌\"或\"停止\"来控制"));
 	}
 
 	@Action("加牌")

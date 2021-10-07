@@ -2,11 +2,14 @@ package com.nobot.plugin.girlFriend;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
+import com.IceCreamQAQ.Yu.annotation.Event;
+import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
+import com.icecreamqaq.yuq.event.GroupMessageEvent;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import net.coobird.thumbnailator.Thumbnails;
@@ -21,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @GroupController
+@EventListener
 public class Gobang
 {
 	private interface GraphicsParams
@@ -369,9 +373,13 @@ public class Gobang
 				.plus("邀请你来一场五子棋，请在1分钟内发送\"同意\"，过时过期");
 	}
 
-	@Action("同意")
-	public void deal(Member qq, Group group) throws IOException
+	@Event(weight = Event.Weight.low)
+	public void deal(GroupMessageEvent event) throws IOException
 	{
+		if (!event.getMessage().getCodeStr().equals("同意"))
+			return;
+		Group group= event.getGroup();
+		Member qq= event.getSender();
 		GobangEntry entry = map.get(group.getId());
 		if (entry == null)
 			throw new DoNone();
@@ -385,7 +393,7 @@ public class Gobang
 		Message message=new Message().plus("棋局开始，").plus(factory.at(entry.initiator))
 				.plus("的回合\r\n发送\"放 {位置}\"如\"放 C12\"来下棋").plus(factory.imageByFile(tmpFile));
 
-		qq.getGroup().sendMessage(message);
+		group.sendMessage(message);
 		tmpFile.delete();
 	}
 
