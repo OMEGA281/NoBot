@@ -57,7 +57,8 @@ public class TodayLuck
 		yesterday=calendar.getTime();
 		String todayInfo= TimeUtils.getFormatData(simpleDateFormat)+name;
 		String todayResult=MD5Utils.getMD5(todayInfo,10);
-		int todayLuck=Integer.parseInt(todayResult.substring(0,2));
+		int index=Integer.parseInt(todayResult.substring(1,2));
+		int todayLuck=Integer.parseInt(todayResult.substring(index+2,index+4));
 		String yesterdayInfo=simpleDateFormat.format(yesterday);
 		String yesterdayResult=MD5Utils.getMD5(yesterdayInfo,10);
 		int yesterdayLuck=Integer.parseInt(yesterdayResult.substring(0,2));

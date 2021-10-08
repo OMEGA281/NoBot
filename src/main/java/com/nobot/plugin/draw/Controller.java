@@ -21,8 +21,10 @@ import org.jdom2.JDOMException;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @PrivateController
 @GroupController
@@ -124,11 +126,11 @@ public class Controller
 	{
 		StringBuilder stringBuilder=new StringBuilder();
 		stringBuilder.append("当前有").append(map.size()).append("个牌库:\r\n");
-		for (String s:map.keySet())
+		for (String s:map.keySet().stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList()))
 		{
 			stringBuilder.append(s).append("\r\n");
 		}
-		stringBuilder.delete(stringBuilder.length()-3,stringBuilder.length());
+		stringBuilder.delete(stringBuilder.length()-2,stringBuilder.length());
 		return new Message().plus(stringBuilder.toString());
 	}
 

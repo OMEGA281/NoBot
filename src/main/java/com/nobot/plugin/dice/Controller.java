@@ -59,15 +59,16 @@ public class Controller
 	}
 
 	@Action(".rh {d}")
-	public void rh(Contact qq,boolean isGroup,String d)
+	public String rh(Contact qq,boolean isGroup,String d,String currentName)
 	{
 		if(!isGroup)
 		{
 			qq.sendMessage(new Message().plus("私聊没有必要暗骰"));
-			return;
+			return null;
 		}
 		String s=r(d);
 		qq.sendMessage(new Message().plus(s));
+		return currentName+"进行了一次私骰";
 	}
 
 	@Action(".ra {skill}")
@@ -100,7 +101,7 @@ public class Controller
 	@Catch(error = NoSuitableCardException.class)
 	public String noCard()
 	{
-		return null;
+		return "未找到人物卡";
 	}
 
 	private Map.Entry<String,Integer> getSkillAndLevel(String skill)
