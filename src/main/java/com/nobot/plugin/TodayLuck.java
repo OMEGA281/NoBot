@@ -57,11 +57,14 @@ public class TodayLuck
 		yesterday=calendar.getTime();
 		String todayInfo= TimeUtils.getFormatData(simpleDateFormat)+name;
 		String todayResult=MD5Utils.getMD5(todayInfo,10);
+
 		int index=Integer.parseInt(todayResult.substring(1,2));
 		int todayLuck=Integer.parseInt(todayResult.substring(index+2,index+4));
 		String yesterdayInfo=simpleDateFormat.format(yesterday);
 		String yesterdayResult=MD5Utils.getMD5(yesterdayInfo,10);
-		int yesterdayLuck=Integer.parseInt(yesterdayResult.substring(0,2));
+
+		index=Integer.parseInt(todayResult.substring(1,2));
+		int yesterdayLuck=Integer.parseInt(yesterdayResult.substring(index+2,index+4));
 		int different=Math.round((todayLuck-yesterdayLuck)/20f);
 		messageLineQ.text("今天"+name+"的运气是"+todayLuck+"\r\n");
 		switch (different)
@@ -129,7 +132,7 @@ public class TodayLuck
 		}
 		messageLineQ.text("\r\n");
 		messageLineQ.text("今天好方向：");
-		int place=Integer.parseInt(todayResult.substring(2,3))/4;
+		int place= (int) (Integer.parseInt(todayResult.substring(12,13))/2.5);
 		switch (place)
 		{
 			case 0:
@@ -147,7 +150,7 @@ public class TodayLuck
 		}
 		messageLineQ.text("\t");
 		messageLineQ.text("今天好颜色：");
-		int color=Integer.parseInt(todayResult.substring(4,5))/10;
+		int color=Integer.parseInt(todayResult.substring(13,14));
 		switch (place)
 		{
 			case 0:

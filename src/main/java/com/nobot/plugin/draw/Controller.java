@@ -147,4 +147,9 @@ public class Controller
 	{
 		return new Message().plus("数值输入错误");
 	}
+	@Catch(error = NoCardException.class)
+	public Message noCardException()
+	{
+		return null;
+	}
 }

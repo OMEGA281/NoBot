@@ -26,4 +26,10 @@ public class Girl
 
 	@Column
 	private int saleNum;
+
+	@Column
+	private Integer decomposeTime;
+
+	@Column
+	private Boolean marry;
 }

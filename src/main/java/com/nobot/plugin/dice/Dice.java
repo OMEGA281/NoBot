@@ -2,6 +2,7 @@ package com.nobot.plugin.dice;
 
 import net.sourceforge.jeval.EvaluationException;
 import net.sourceforge.jeval.Evaluator;
+import net.sourceforge.jeval.operator.AbstractOperator;
 
 import javax.inject.Inject;
 import java.util.Random;
@@ -12,6 +13,25 @@ public class Dice
 {
 	private Random random;
 	private Evaluator evaluator;
+
+	private class RandomOperator extends AbstractOperator
+	{
+		private Random random;
+		public RandomOperator()
+		{
+			super("d",7);
+			random=new Random();
+		}
+
+		@Override
+		public double evaluate(double leftOperand, double rightOperand)
+		{
+			int sum=0;
+			for(int i=0;i<leftOperand;i++)
+				sum+=random.nextInt((int) rightOperand-1)+1;
+			return sum;
+		}
+	}
 
 	public Dice()
 	{

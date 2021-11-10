@@ -138,7 +138,11 @@ public class Card implements ConstantPool
 			if(max!=null)
 			{
 				int maxTime=Integer.parseInt(max);
-				if(0<maxTime&&maxTime<10)
+				if(0>maxTime)
+					this.maxTime=1;
+				else if(maxTime>globalMaxTime)
+					this.maxTime=globalMaxTime;
+				else
 					this.maxTime=maxTime;
 			}
 		}

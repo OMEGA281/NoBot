@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 
 interface ConstantPool
 {
+	int globalMaxTime=15;
 	String drawPool="DrawPool";
 
 	String specialWord ="\\$\\[(.+?)[:：](.+?)\\]#";

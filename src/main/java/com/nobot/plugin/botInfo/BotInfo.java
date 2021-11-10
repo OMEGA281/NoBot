@@ -1,17 +1,21 @@
-package com.nobot.plugin;
+package com.nobot.plugin.botInfo;
 
 import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Config;
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent;
+import com.icecreamqaq.yuq.RainVersion;
+import com.icecreamqaq.yuq.YuQ;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.PrivateController;
+import com.icecreamqaq.yuq.event.GroupMessageEvent;
 import com.icecreamqaq.yuq.event.MessageEvent;
 import com.icecreamqaq.yuq.event.SendMessageEvent;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.icecreamqaq.yuq.message.MessageLineQ;
+import com.nobot.plugin.botInfo.Service.GroupStateService;
 import com.nobot.system.GetResource;
 import com.nobot.system.annotation.CreateFile;
 import com.nobot.tool.FileUtils;
@@ -42,6 +46,10 @@ public class BotInfo
 	FileUtils fileUtils;
 	@Inject
 	MessageItemFactory factory;
+	@Inject
+	GroupStateService groupStateService;
+	@Inject
+	RainVersion rainVersion;
 
 	Instant startTime;
 	String version;
@@ -58,6 +66,32 @@ public class BotInfo
 		version=reader.readLine().substring(1);
 		inputStream.close();
 	}
+//	@Event
+//	public void messageStopper(MessageEvent event)
+//	{
+////		FIXME:排除.boton和.botoff
+//		boolean cancel=false;
+//		if(event instanceof GroupMessageEvent)
+//		{
+//			cancel=groupStateService.getGroupState(((GroupMessageEvent) event).getGroup().getId());
+//			if (cancel)
+//			{
+//				event.setCancel(true);
+//				return;
+//			}
+//			if(groupStateService.getGroupBlacklist(((GroupMessageEvent) event).getGroup().getId())
+//					.contains(event.getSender().getId()))
+//			{
+//				event.setCancel(true);
+//				return;
+//			}
+//		}
+//		if(groupStateService.getGroupBlacklist(-1).contains(event.getSender().getId()))
+//		{
+//			event.setCancel(true);
+//			return;
+//		}
+//	}
 	@Event
 	public void addReceiveMessageNum(MessageEvent event)
 	{
@@ -73,17 +107,19 @@ public class BotInfo
 	{
 		MessageLineQ messageLineQ=new MessageLineQ(new Message());
 		messageLineQ.text("NoBot").text("-").text(version==null?"未知版本":version).text("\r\n")
-				.text("[").text("YuQ-ArtQQ:0.0.6.10-R52").text("\r\n")
-				.text("YuQ:0.1.0.0-DEV21").text("\r\n")
+				.text("[").text(rainVersion.runtimeName()+rainVersion.runtimeVersion()).text("\r\n")
+				.text("YuQ:"+rainVersion.apiVersion()).text("\r\n")
 				.text("Yu-Core:0.2.0.0-DEV13").text("]").text("\r\n")
 				.text(System.getProperty("os.name")).text("\\").text(System.getProperty("os.version")).text(" ")
 				.text(System.getProperty("os.arch")).text(" ").text("jvm:").text(System.getProperty("java.version"))
 				.text("\r\n");
-		double totalMemory=Runtime.getRuntime().totalMemory()/(1024D*1024D*1024D);
-		double freeMemory=Runtime.getRuntime().freeMemory()/(1024D*1024D*1024D);
-		DecimalFormat decimalFormat=new DecimalFormat("##0.00");
+		double totalMemory=Runtime.getRuntime().totalMemory()/(1024D*1024D);
+		double freeMemory=Runtime.getRuntime().freeMemory()/(1024D*1024D);
+		double maxMemory=Runtime.getRuntime().maxMemory()/(1024D*1024D);
+		DecimalFormat decimalFormat=new DecimalFormat("####0.00");
 		messageLineQ.text("内存：").text(decimalFormat.format(freeMemory)).text("/")
-				.text(decimalFormat.format(totalMemory)).text("\r\n");
+				.text(decimalFormat.format(totalMemory)).text("\r\n").text("/")
+				.text(decimalFormat.format(maxMemory)).text("M");
 		messageLineQ.text("CPU：").text(Runtime.getRuntime().availableProcessors()+"核 ").text("\r\n");
 		Instant now=Instant.now();
 		LocalDateTime startDateTime=LocalDateTime.ofInstant(startTime, ZoneId.systemDefault());
