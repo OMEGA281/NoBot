@@ -35,6 +35,21 @@ public class Master
 	@Column
 	private int creatTime;
 
+	@Column
+	private int decomposeTime;
+
+	@Column
+	private int buyTime;
+
+	@Column
+	private int saleTime;
+
+	@Column
+	private int workSumTime;
+
+	@Column
+	private int drawTime;
+
 	public void setActive(int active)
 	{
 		if(active>100)

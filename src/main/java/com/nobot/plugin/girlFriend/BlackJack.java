@@ -129,8 +129,8 @@ public class BlackJack
 			return new Message().plus("赌注太大了吧 还是200以下吧");
 		if(gold<0)
 			return new Message().plus("这个赌注很有意思 但是还请正常点");
-		Master initiator= service.getMaster(qq.getId(),group.getId());
-		Master opponent= service.getMaster(at.getId(),group.getId());
+		Master initiator= service.getMaster(group.getId(), qq.getId());
+		Master opponent= service.getMaster(group.getId(), at.getId());
 		if(initiator==null)
 			return new Message().plus("你没开户啊");
 		if(opponent==null)

@@ -6,7 +6,8 @@ import com.nobot.plugin.girlFriend.entity.Girl;
 import com.nobot.plugin.girlFriend.entity.MyGroup;
 
 @Dao
-public interface GirlDAO extends YuDao<Girl,String>
+public interface GirlDAO extends YuDao<Girl,Long>
 {
+	Girl findById(long ID);
 	Girl findByGroupNumAndName(MyGroup groupNum, String name);
 }

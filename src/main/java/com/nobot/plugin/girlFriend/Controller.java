@@ -4,6 +4,8 @@ import com.IceCreamQAQ.Yu.annotation.Action;
 import com.IceCreamQAQ.Yu.annotation.Before;
 import com.IceCreamQAQ.Yu.annotation.JobCenter;
 import com.IceCreamQAQ.Yu.annotation.Synonym;
+import com.IceCreamQAQ.Yu.entity.DoNone;
+import com.IceCreamQAQ.Yu.job.JobManager;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.controller.BotActionContext;
 import com.icecreamqaq.yuq.entity.Group;
@@ -16,6 +18,7 @@ import com.nobot.plugin.girlFriend.entity.Master;
 import com.nobot.plugin.girlFriend.service.ImageGenerationService;
 import com.nobot.plugin.girlFriend.service.Service;
 import com.nobot.system.annotation.CreateDir;
+import lombok.var;
 import net.coobird.thumbnailator.Thumbnails;
 
 import javax.inject.Inject;
@@ -31,7 +34,8 @@ import java.util.Random;
 @CreateDir(GirlPool.GIRL_POOL)
 public class Controller
 {
-	Random random=new Random();
+	private Map<Long,Map<Long,String>> map=new HashMap<>();
+	private Random random=new Random();
 	@Inject
 	private Service service;
 
@@ -39,20 +43,39 @@ public class Controller
 	private MessageItemFactory factory;
 
 	@Inject
+	private JobManager jobManager;
+
+	@Inject
 	private ImageGenerationService imageGenerationService;
 
-	@Before(except = {"open","simulateDrawGirl"})
+	@Before(except = {"open","simulateDrawGirl","groupWifeStates"})
 	public void getInfo(Member qq, BotActionContext actionContext)
 	{
-		Master master= service.getMaster(qq.getId(),qq.getGroup().getId());
+		Master master= service.getMaster(qq.getGroup().getId(), qq.getId());
 		if(master==null)
 			throw new Message().plus("你尚未开户 输入\"开户\"来开户").toThrowable();
+	}
+
+	@Before(except = {"simulateDrawGirl","groupWifeStates","myInfo","market","findWife","stopWork","GMSendMoney"})
+	public void isWorking(long group,long qq, BotActionContext actionContext)
+	{
+		boolean b;
+		if(map.containsKey(group))
+		{
+			var m=map.get(group);
+			var s=m.get(qq);
+			b= s != null;
+		}
+		else
+			b= false;
+		if(b)
+			throw new DoNone();
 	}
 
 	@Action("开户")
 	public Message open(Member qq)
 	{
-		if(service.getMaster(qq.getId(),qq.getGroup().getId())!=null)
+		if(service.getMaster(qq.getGroup().getId(), qq.getId())!=null)
 			return new Message().plus("你已经在本群开过户了");
 		Master master=service.creatNewMaster(qq.getId(), qq.getGroup().getId());
 		service.saveMaster(master);
@@ -61,30 +84,34 @@ public class Controller
 
 	@Action("每日签到")
 	@Synonym("签到")
-	public Message dailySign(Member qq)
+	public Message dailySign(long group,long qq)
 	{
-		Master master= service.getMaster(qq.getId(),qq.getGroup().getId());
-		if(master.getLastSignTime()>=service.getCurrentTime())
+		if(service.checkTodaySign(group,qq))
 			return new Message().plus("你今天已经签到了");
-		int g=35+ random.nextInt(11);
-		master.setGold(master.getGold()+g);
-		master.setActive(master.getActive()+30);
-		master.setLastSignTime(service.getCurrentTime());
-		service.saveMaster(master);
-		return new Message().plus("签到成功，获得"+g+"g，现在你有"+master.getGold()+"g，要保持哦 长期不签到老婆会离去的");
+		else
+		{
+			int reward=35+ random.nextInt(11);
+			int gold=service.getGold(group, qq)+reward;
+			service.setGold(group, qq, gold);
+			service.setActive(group,qq,service.getActive(group,qq)+30);
+			service.signToday(group,qq);
+			return new Message().plus("签到成功，获得"+reward+"g，现在你有"+gold+"g，要保持哦 长期不签到老婆会离去的");
+		}
 	}
 
 	@Action("抽老婆")
-	public Message drawGirl(Member qq)
+	public Message drawGirl(long groupNum,long qq)
 	{
-		Master master= service.getMaster(qq.getId(),qq.getGroup().getId());
-		if(master.getGold()<30)
+		int gold=service.getGold(groupNum,qq);
+		if(gold<30)
 			return new Message().plus("你的金币不足30，可以通过每日签到来获得金币");
-		Girl girl= service.getRandomFreeGirl(qq.getGroup().getId(), qq.getId());
+		var girl= service.getRandomFreeGirl(groupNum);
 		if(girl==null)
 			return new Message().plus("哎呀 本群老婆都有了主了");
-		master.setGold(master.getGold()-30);
-		service.saveMaster(master);
+		service.setGirlMaster(groupNum,qq,girl.getId());
+
+		service.setGold(groupNum,qq,gold-30);
+		service.addDrawTime(groupNum,qq,1);
 		return new Message().plus("恭喜你获得了"+girl.getName()+"\r\n")
 				.plus(factory.imageByFile(service.getGirlImage(girl.getName())).plus("要好好对待她哦"));
 	}
@@ -92,7 +119,7 @@ public class Controller
 	@Action("模拟抽老婆")
 	public Message simulateDrawGirl(Member qq)
 	{
-		Girl girl= service.simulateGetRandomFreeGirl(qq.getGroup().getId());
+		var girl= service.getRandomFreeGirl(qq.getGroup().getId());
 		if(girl==null)
 			return new Message().plus("哎呀 本群老婆都有了主了");
 		return new Message().plus("恭喜你获得了"+girl.getName()+"\r\n")
@@ -102,7 +129,7 @@ public class Controller
 	@Action("我的状态")
 	public void myInfo(Member qq) throws IOException
 	{
-		Master master= service.getMaster(qq.getId(),qq.getGroup().getId());
+		Master master= service.getMaster(qq.getGroup().getId(), qq.getId());
 		Message message=new Message();
 		message.plus("金币："+master.getGold()+"\r\n");
 		message.plus("亲密度："+master.getActive()+"\r\n");
@@ -127,11 +154,10 @@ public class Controller
 	}
 
 	@Action("卖老婆 {name} {num}")
-	public Message saleWife(Member qq, String name, String num)
+	public Message saleWife(long group,long qq, String name, String num)
 	{
 		int gold=Integer.parseInt(num);
-		boolean b=service.saleWife(qq.getId(),qq.getGroup().getId(),
-				name.replaceAll("_"," "), gold);
+		boolean b=service.saleWife(group, qq,name.replaceAll("_"," "), gold);
 		if(b)
 			return new Message().plus("挂载出售了哦，可以使用\"撤回出售 {名字}\"来撤回");
 		else
@@ -141,7 +167,7 @@ public class Controller
 	@Action("撤回出售 {name}")
 	public Message saleWife(Member qq, String name)
 	{
-		boolean b=service.saleWife(qq.getId(),qq.getGroup().getId(),
+		boolean b=service.saleWife(qq.getGroup().getId(), qq.getId(),
 				name.replaceAll("_"," "), -1);
 		if(b)
 			return new Message().plus("撤回出售了");
@@ -152,7 +178,7 @@ public class Controller
 	@Action("市场")
 	public void market(Group group,Member qq) throws IOException
 	{
-		int gold=service.getMaster(qq.getId(), group.getId()).getGold();
+		int gold=service.getMaster(group.getId(), qq.getId()).getGold();
 		Map<String,Integer> map=service.listForSaleGirl(group.getId());
 		MessageLineQ messageLineQ=new MessageLineQ(new Message());
 		messageLineQ.text(qq.getName()).text("有"+gold).text("g\r\n市场老婆如下：");
@@ -176,41 +202,42 @@ public class Controller
 	}
 
 	@Action("买老婆 {name}")
-	public Message buyWife(Member qq,String name)
+	public Message buyWife(long group,long qq,String name)
 	{
 		name=name.replaceAll("_"," ");
-		Map<String,Integer> map=service.listForSaleGirl(qq.getGroup().getId());
+		Map<String,Integer> map=service.listForSaleGirl(group);
 		if(!map.containsKey(name))
 			return new Message().plus("没有人售卖她哦");
-		Master master=service.getMaster(qq.getId(),qq.getGroup().getId());
 		int gold=map.get(name);
-		if(master.getGold()<gold)
+		if(service.getGold(group,qq)<gold)
 			return new Message().plus("你的金钱不足");
-		service.addGold(service.findWife(qq.getGroup().getId(),name).getMaster().getUserNum(),qq.getGroup().getId(),gold);
-		service.addGold(qq.getId(),qq.getGroup().getId(),-gold);
-		service.setWifeByName(qq.getId(),qq.getGroup().getId(),name);
+		service.addGold(group,service.findWife(group,name).getMaster().getUserNum(),gold);
+		service.addSaleTime(group,qq,1);
+		service.addGold(group,qq,-gold);
+		service.addBuyTime(group,qq,1);
+		service.setWifeByName(qq,group,name);
 		return new Message().plus("恭喜你获得了"+name+"\r\n")
 				.plus(factory.imageByFile(service.getGirlImage(name)).plus("要好好对待她哦"));
 	}
 
 	@Action("转账 {at} {t_num}")
-	public Message sendMoney(Member qq,Member at,String t_num)
+	public Message sendMoney(long group,long qq,long at,String t_num)
 	{
 		int num=Integer.parseInt(t_num);
 		if(num<=0)
 			return new Message().plus("有这样的想法是不好的");
-		Master me=service.getMaster(qq.getId(), qq.getGroup().getId());
+		Master me=service.getMaster(group,qq);
 		if(num>me.getGold())
 			return new Message().plus("你没有这么多钱");
-		service.addGold(qq.getId(),qq.getGroup().getId(),-num);
-		service.addGold(at.getId(),at.getGroup().getId(),num);
+		service.addGold(group,qq,-num);
+		service.addGold(group,at,num);
 		return new Message().plus("成功转账"+num);
 	}
 	@Action("分解 {name}")
-	public Message decompose(Member qq,String name)
+	public Message decompose(long group,long qq,String name)
 	{
 		name=name.replaceAll("_"," ");
-		Master master= service.getMaster(qq.getId(), qq.getGroup().getId());
+		Master master= service.getMaster(group,qq);
 		boolean exist=false;
 		for(Girl girl:master.getGirlList())
 		{
@@ -222,9 +249,10 @@ public class Controller
 		}
 		if(!exist)
 			return new Message().plus("你没有"+name);
-		service.setWifeFree(qq.getId(),qq.getGroup().getId(),name);
+		service.setWifeFree(qq,group,name);
 		int gold=5+ random.nextInt(11);
-		service.addGold(qq.getId(), qq.getGroup().getId(),gold);
+		service.addGold(group,qq,gold);
+		service.addDecomposeTime(group,qq,1);
 		return new Message().plus("你残忍的分解了"+name+"获得了"+gold+"金币");
 	}
 	@Action("查老婆 {name}")
@@ -254,6 +282,60 @@ public class Controller
 		return new Message().plus("共有"+service.listGirl().size()+"位老婆")
 				.plus("其中"+service.countGroupWife(group)+"位有了主人");
 	}
+
+	@Action("打工{num}小时")
+	public Message work(Group group ,long qq,String num)
+	{
+		Map<Long,String> m;
+		if(map.containsKey(group.getId()))
+		{
+			m=map.get(group.getId());
+			var s=m.get(qq);
+			if(s!=null)
+				return null;
+		}
+		int time=Integer.parseInt(num);
+		if(time<=0||time>24)
+			return null;
+		String token=jobManager.registerTimer(() -> {
+			long gold=0L;
+			for (int i=0;i<time;i++)
+			{
+				gold=gold+(random.nextInt(3)+random.nextInt(3)+2)*(time/10L+1);
+			}
+			int love=4*time;
+			service.addGold(group.getId(),qq,(int)gold);
+			service.addActive(group.getId(),qq,love);
+			var message= new Message().plus(factory.at(qq)).plus("工作完毕，获得")
+					.plus(String.valueOf((int)gold)).plus("金币，失去").plus(String.valueOf(love)).plus("点亲密");
+			group.sendMessage(message);
+		},time*60*60*1000);
+		if(!map.containsKey(group.getId()))
+		{
+			Map<Long,String> tokens=new HashMap<>();
+			tokens.put(qq,token);
+			map.put(group.getId(),tokens);
+		}
+		return new Message().plus("开始工作了，工作过程中其他活动无法进行\r\n\"取消工作\"可以取消 但是没有收益\r\n（如果骰主关机了那就会被强制停止无收益）");
+	}
+
+	@Action("取消工作")
+	public Message stopWork(long group,long qq)
+	{
+		if(map.containsKey(group))
+		{
+			var m=map.get(group);
+			var s=m.get(qq);
+			if(s==null)
+				return null;
+			else
+				jobManager.deleteTimer(s);
+		}
+		else
+			return null;
+		return new Message().plus("你取消了工作");
+	}
+
 	@Action("!GM金币给予 {at} {gold}")
 	public Message GMSendMoney(long at,int gold,long SOPNum,Member qq)
 	{

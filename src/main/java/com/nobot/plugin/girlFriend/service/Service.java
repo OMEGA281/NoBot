@@ -8,6 +8,9 @@ import com.nobot.plugin.girlFriend.dao.MasterDAO;
 import com.nobot.plugin.girlFriend.entity.Girl;
 import com.nobot.plugin.girlFriend.entity.Master;
 import com.nobot.plugin.girlFriend.entity.MyGroup;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.var;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -16,6 +19,14 @@ import java.util.*;
 
 public class Service implements GirlPool
 {
+	@AllArgsConstructor
+	public class NoMasterExceptionRecordException extends RuntimeException
+	{
+		@Getter
+		private long groupNum, masterNum;
+	}
+
+	private final int NO_SALE=-1;
 	@Inject
 	private MasterDAO masterDAO;
 	@Inject
@@ -26,6 +37,39 @@ public class Service implements GirlPool
 	Random random=new Random();
 
 	@Transactional
+	public boolean setGirlMaster(long groupNum,long girlID,long masterNum)
+	{
+		var girl=girlDAO.findById(girlID);
+		if(girl==null)
+			return false;
+		Master master=masterDAO.findByGroupNumAndUserNum(groupNum,masterNum);
+		if(master==null)
+			masterDAO.save(creatNewMaster(masterNum,groupNum));
+		if(girl.getMaster().getUserNum()==masterNum)
+			return true;
+		girl.setMaster(master);
+		girlDAO.update(girl);
+		return true;
+	}
+
+	@Transactional
+	public boolean setGirlMasterByMasterID(long girlID,long masterID)
+	{
+		var girl=girlDAO.findById(girlID);
+		if(girl==null)
+			return false;
+		var master=masterDAO.findByID(masterID);
+		if(master==null)
+			return false;
+
+		if(girl.getMaster()==master)
+			return true;
+		girl.setMaster(master);
+		girlDAO.update(girl);
+		return true;
+	}
+
+	@Transactional
 	public List<Girl> getWifeList(long userNum, long groupNum)
 	{
 		Master master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
@@ -34,6 +78,7 @@ public class Service implements GirlPool
 		return master.getGirlList();
 	}
 
+	@Deprecated
 	@Transactional
 	public void setWife(long userNum,long groupNum,Girl girl)
 	{
@@ -84,10 +129,12 @@ public class Service implements GirlPool
 		{
 			girl=new Girl();
 			girl.setName(name);
+			girl.setDecomposeTime(0);
 		}
 		girl.setMaster(master);
 		girl.setGroupNum(group);
 		girl.setSaleNum(-1);
+		girl.setMarry(false);
 		girlDAO.saveOrUpdate(girl);
 	}
 
@@ -120,10 +167,12 @@ public class Service implements GirlPool
 		{
 			girl=new Girl();
 			girl.setName(name);
+			girl.setDecomposeTime(0);
 		}
 		girl.setMaster(null);
 		girl.setGroupNum(group);
 		girl.setSaleNum(-1);
+		girl.setMarry(false);
 		girlDAO.saveOrUpdate(girl);
 	}
 
@@ -174,7 +223,7 @@ public class Service implements GirlPool
 	}
 
 	@Transactional
-	public boolean saleWife(long userNum,long groupNum,String name,int gold)
+	public boolean saleWife(long groupNum, long userNum, String girlName, int gold)
 	{
 		Master master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
 		if(master==null)
@@ -192,7 +241,7 @@ public class Service implements GirlPool
 		Girl girl = null;
 		for (Girl g:girlList)
 		{
-			if(g.getName().equals(name))
+			if(g.getName().equals(girlName))
 			{
 				girl = g;
 				break;
@@ -214,7 +263,11 @@ public class Service implements GirlPool
 		master.setGirlList(new ArrayList<>());
 		master.setLastSignTime(19000101);
 		master.setActive(80);
-		master.setCreatTime(getCurrentTime());
+		master.setCreatTime(getToday());
+		master.setBuyTime(0);
+		master.setSaleTime(0);
+		master.setDecomposeTime(0);
+		master.setWorkSumTime(0);
 		return master;
 	}
 
@@ -226,72 +279,15 @@ public class Service implements GirlPool
 		return group;
 	}
 
-	public int getCurrentTime()
-	{
-		SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMdd");
-		return Integer.parseInt(simpleDateFormat.format(System.currentTimeMillis()));
-	}
+
 
 	/**
-	 * 随机获得一个新老婆 执行完之后老婆已到账
-	 * @param groupNum
-	 * @param userNum
-	 * @return
-	 */
-	@Transactional
-	public Girl getRandomFreeGirl(long groupNum,long userNum)
-	{
-		MyGroup group=groupDAO.findById(groupNum);
-		if(group==null)
-		{
-			group = creatGroup(groupNum);
-			groupDAO.save(group);
-		}
-		Master master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
-
-		List<Girl> girlList=group.getGirlList();
-		List<Girl> noMasterGirl=new ArrayList<>();
-		for (Iterator<Girl> iterator=girlList.iterator();iterator.hasNext();)
-		{
-			Girl girl=iterator.next();
-			if (girl.getMaster() == null)
-			{
-				noMasterGirl.add(girl);
-				iterator.remove();
-			}
-		}
-		Map<String,File> map=listGirl();
-		for (Girl girl:girlList)
-			if(map.containsKey(girl.getName()))
-				map.remove(girl.getName());
-		if(map.size()==0)
-			return null;
-		int i=random.nextInt(map.size());
-		String name=map.keySet().toArray(new String[0])[i];
-
-		for (Girl girl:noMasterGirl)
-			if(girl.getName().equals(name))
-			{
-				girl.setMaster(master);
-				girlDAO.update(girl);
-				return girl;
-			}
-		Girl girl=new Girl();
-		girl.setName(name);
-		girl.setGroupNum(group);
-		girl.setSaleNum(-1);
-		girl.setMaster(master);
-		girlDAO.save(girl);
-		return girl;
-	}
-
-	/**
-	 * 模拟随机获得一个新老婆（看着玩的） 执行完之后老婆已到账
+	 * 随机获得一个新老婆
 	 * @param groupNum
 	 * @return
 	 */
 	@Transactional
-	public Girl simulateGetRandomFreeGirl(long groupNum)
+	public Girl getRandomFreeGirl(long groupNum)
 	{
 		MyGroup group=groupDAO.findById(groupNum);
 		if(group==null)
@@ -302,33 +298,33 @@ public class Service implements GirlPool
 
 		List<Girl> girlList=group.getGirlList();
 		List<Girl> noMasterGirl=new ArrayList<>();
-		for (Iterator<Girl> iterator=girlList.iterator();iterator.hasNext();)
-		{
-			Girl girl=iterator.next();
-			if (girl.getMaster() == null)
-			{
+		girlList.forEach(girl -> {
+			if (girl.getMaster()==null)
 				noMasterGirl.add(girl);
-				iterator.remove();
-			}
-		}
-		Map<String,File> map=listGirl();
-		for (Girl girl:girlList)
-			if(map.containsKey(girl.getName()))
-				map.remove(girl.getName());
-		if(map.size()==0)
-			return null;
-		int i=random.nextInt(map.size());
-		String name=map.keySet().toArray(new String[0])[i];
+		});
 
-		for (Girl girl:noMasterGirl)
-			if(girl.getName().equals(name))
-			{
-				return girl;
-			}
-		Girl girl=new Girl();
-		girl.setName(name);
-		girl.setGroupNum(group);
-		return girl;
+		Map<String,File> map=listGirl();
+		girlList.forEach(girl -> map.remove(girl.getName()));
+
+		if(noMasterGirl.size()==0&&map.size()==0)
+			return null;
+
+		int i=random.nextInt(noMasterGirl.size()+map.size());
+		if(i>=noMasterGirl.size())
+		{
+//			超过已有card，抽取库存
+			i=i-noMasterGirl.size();
+			Girl girl=new Girl();
+			girl.setGroupNum(group);
+			girl.setSaleNum(NO_SALE);
+			girl.setMarry(false);
+			girl.setDecomposeTime(0);
+			girl.setName(map.keySet().toArray(new String[0])[i]);
+			girlDAO.save(girl);
+			return girl;
+		}
+		else
+			return noMasterGirl.get(i);
 	}
 
 	public Map<String, File> listGirl()
@@ -353,16 +349,65 @@ public class Service implements GirlPool
 	}
 
 	@Transactional
-	public boolean addGold(long userNum,long groupNum,int gold)
+	public int getGold(long groupNum,long userNum)
 	{
-		Master master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
+		var master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
 		if(master==null)
-			return false;
-		if(gold==0)
-			return true;
-		master.setGold(master.getGold()+gold);
-		masterDAO.saveOrUpdate(master);
-		return true;
+			throw new NoMasterExceptionRecordException(groupNum,userNum);
+		return master.getGold();
+	}
+
+	@Transactional
+	public void setGold(long groupNum,long userNum,int gold)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(groupNum,userNum);
+		master.setGold(gold);
+		masterDAO.update(master);
+	}
+
+	@Transactional
+	public int addGold(long groupNum,long userNum,int gold)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(groupNum,userNum);
+		int i=master.getGold()+gold;
+		master.setGold(i);
+		masterDAO.update(master);
+		return i;
+	}
+
+	@Transactional
+	public int getActive(long groupNum,long userNum)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(groupNum,userNum);
+		return master.getActive();
+	}
+
+	@Transactional
+	public void setActive(long groupNum,long userNum,int active)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(groupNum,userNum);
+		master.setActive(active);
+		masterDAO.update(master);
+	}
+
+	@Transactional
+	public int addActive(long groupNum,long userNum,int active)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(groupNum,userNum);
+		int i=master.getActive()+active;
+		master.setActive(active);
+		masterDAO.update(master);
+		return i;
 	}
 
 	@Transactional
@@ -395,7 +440,7 @@ public class Service implements GirlPool
 	}
 
 	@Transactional
-	public Master getMaster(long userNum,long groupNum)
+	public Master getMaster(long groupNum, long userNum)
 	{
 		return masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
 	}
@@ -406,9 +451,199 @@ public class Service implements GirlPool
 		masterDAO.saveOrUpdate(master);
 	}
 
+	/**
+	 * 检查今天是否签到了
+	 * @param groupNum
+	 * @param userNum
+	 * @return
+	 */
 	@Transactional
-	public void updateGirl(Girl girl)
+	public boolean checkTodaySign(long groupNum,long userNum)
 	{
-		girlDAO.update(girl);
+		var master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(groupNum,userNum);
+		int i=master.getLastSignTime();
+		return i >= getToday();
+	}
+
+	@Transactional
+	public void setSign(long groupNum,long userNum,int sign)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(groupNum,userNum);
+		master.setLastSignTime(sign);
+		masterDAO.update(master);
+	}
+
+	@Transactional
+	public int getDecomposeTime(long group,long userNum)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		return master.getDecomposeTime();
+	}
+
+	@Transactional
+	public void setDecomposeTime(long group,long userNum,int num)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		master.setDecomposeTime(num);
+		masterDAO.update(master);
+	}
+
+	@Transactional
+	public int addDecomposeTime(long group,long userNum,int num)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		int i=master.getDecomposeTime()+num;
+		master.setDecomposeTime(i);
+		masterDAO.update(master);
+		return i;
+	}
+
+	@Transactional
+	public int getBuyTime(long group,long userNum)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		return master.getBuyTime();
+	}
+
+	@Transactional
+	public void setBuyTime(long group,long userNum,int num)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		master.setBuyTime(num);
+		masterDAO.update(master);
+	}
+
+	@Transactional
+	public int addBuyTime(long group,long userNum,int num)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		int i=master.getBuyTime()+num;
+		master.setBuyTime(i);
+		masterDAO.update(master);
+		return i;
+	}
+
+	@Transactional
+	public int getSaleTime(long group,long userNum)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		return master.getSaleTime();
+	}
+
+	@Transactional
+	public void setSaleTime(long group,long userNum,int num)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		master.setSaleTime(num);
+		masterDAO.update(master);
+	}
+
+	@Transactional
+	public int addSaleTime(long group,long userNum,int num)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		int i=master.getSaleTime()+num;
+		master.setSaleTime(i);
+		masterDAO.update(master);
+		return i;
+	}
+
+	@Transactional
+	public int getWorkSumTime(long group,long userNum)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		return master.getWorkSumTime();
+	}
+
+	@Transactional
+	public void setWorkSumTime(long group,long userNum,int num)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		master.setWorkSumTime(num);
+		masterDAO.update(master);
+	}
+
+	@Transactional
+	public int addWorkSumTime(long group,long userNum,int num)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		int i=master.getWorkSumTime()+num;
+		master.setWorkSumTime(i);
+		masterDAO.update(master);
+		return i;
+	}
+
+	@Transactional
+	public int getDrawTime(long group,long userNum)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		return master.getDrawTime();
+	}
+
+	@Transactional
+	public void setDrawTime(long group,long userNum,int num)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		master.setDrawTime(num);
+		masterDAO.update(master);
+	}
+
+	@Transactional
+	public int addDrawTime(long group,long userNum,int num)
+	{
+		var master=masterDAO.findByGroupNumAndUserNum(group,userNum);
+		if(master==null)
+			throw new NoMasterExceptionRecordException(group,userNum);
+		int i=master.getDrawTime()+num;
+		master.setDrawTime(i);
+		masterDAO.update(master);
+		return i;
+	}
+
+	public void signToday(long groupNum,long userNum)
+	{
+		setSign(groupNum,userNum,getToday());
+	}
+
+	/**
+	 * 获得今天的日期
+	 * @return 储存在int中的格式为yyyyMMdd的日期
+	 */
+	public int getToday()
+	{
+		SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMdd");
+		return Integer.parseInt(simpleDateFormat.format(System.currentTimeMillis()));
 	}
 }
