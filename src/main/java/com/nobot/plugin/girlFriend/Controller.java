@@ -108,7 +108,7 @@ public class Controller
 		var girl= service.getRandomFreeGirl(group);
 		if(girl==null)
 			return new Message().plus("哎呀 本群老婆都有了主了");
-		service.setGirlMaster(group,qq,girl.getId());
+		service.setGirlMaster(group, qq, girl.getId());
 
 		service.setGold(group,qq,gold-30);
 		service.addDrawTime(group,qq,1);
@@ -211,9 +211,9 @@ public class Controller
 		int gold=map.get(name);
 		if(service.getGold(group,qq)<gold)
 			return new Message().plus("你的金钱不足");
-		service.addGold(group,service.findWife(group,name).getMaster().getUserNum(),gold);
+		service.addGold(group,service.findWife(group,name).getMaster().getUserNum(), gold);
 		service.addSaleTime(group,qq,1);
-		service.addGold(group,qq,-gold);
+		service.addGold(group, qq, -gold);
 		service.addBuyTime(group,qq,1);
 		service.setWifeByName(qq,group,name);
 		return new Message().plus("恭喜你获得了"+name+"\r\n")
@@ -229,8 +229,8 @@ public class Controller
 		Master me=service.getMaster(group,qq);
 		if(num>me.getGold())
 			return new Message().plus("你没有这么多钱");
-		service.addGold(group,qq,-num);
-		service.addGold(group,at,num);
+		service.addGold(group, qq, -num);
+		service.addGold(group, at, num);
 		return new Message().plus("成功转账"+num);
 	}
 	@Action("分解 {name}")
@@ -251,7 +251,7 @@ public class Controller
 			return new Message().plus("你没有"+name);
 		service.setWifeFree(qq,group,name);
 		int gold=5+ random.nextInt(11);
-		service.addGold(group,qq,gold);
+		service.addGold(group, qq, gold);
 		service.addDecomposeTime(group,qq,1);
 		return new Message().plus("你残忍的分解了"+name+"获得了"+gold+"金币");
 	}
@@ -304,7 +304,7 @@ public class Controller
 				gold=gold+(random.nextInt(3)+random.nextInt(3)+2)*(time/10L+1);
 			}
 			int love=4*time;
-			service.addGold(group.getId(),qq,(int)gold);
+			service.addGold(group.getId(), qq, (int)gold);
 			service.addActive(group.getId(),qq,love);
 			var message= new Message().plus(factory.at(qq)).plus("工作完毕，获得")
 					.plus(String.valueOf((int)gold)).plus("金币，失去").plus(String.valueOf(love)).plus("点亲密");
@@ -346,8 +346,8 @@ public class Controller
 			return null;
 		if(at==-1)
 			for (long member:qq.getGroup().getMembers().keySet())
-				service.addGold(member,qq.getGroup().getId(),gold);
-		service.addGold(at,qq.getGroup().getId(),gold);
+				service.addGold(qq.getGroup().getId(), member, gold);
+		service.addGold(qq.getGroup().getId(), at, gold);
 		return new Message().plus("给予").plus(at==-1?"全体":Long.toString(at))
 				.plus(Integer.toString(gold)).plus("金币");
 	}
