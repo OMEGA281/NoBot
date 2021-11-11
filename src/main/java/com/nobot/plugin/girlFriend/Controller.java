@@ -308,6 +308,9 @@ public class Controller
 			service.addActive(group.getId(),qq,love);
 			var message= new Message().plus(factory.at(qq)).plus("工作完毕，获得")
 					.plus(String.valueOf((int)gold)).plus("金币，失去").plus(String.valueOf(love)).plus("点亲密");
+			var groupMap=map.get(group.getId());
+			if(groupMap!=null)
+				groupMap.remove(qq);
 			group.sendMessage(message);
 		},time*60*60*1000);
 		var tokens = map.computeIfAbsent(group.getId(), k -> new HashMap<>());
