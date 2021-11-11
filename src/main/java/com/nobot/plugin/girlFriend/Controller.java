@@ -100,18 +100,18 @@ public class Controller
 	}
 
 	@Action("抽老婆")
-	public Message drawGirl(long groupNum,long qq)
+	public Message drawGirl(long group,long qq)
 	{
-		int gold=service.getGold(groupNum,qq);
+		int gold=service.getGold(group,qq);
 		if(gold<30)
 			return new Message().plus("你的金币不足30，可以通过每日签到来获得金币");
-		var girl= service.getRandomFreeGirl(groupNum);
+		var girl= service.getRandomFreeGirl(group);
 		if(girl==null)
 			return new Message().plus("哎呀 本群老婆都有了主了");
-		service.setGirlMaster(groupNum,qq,girl.getId());
+		service.setGirlMaster(group,qq,girl.getId());
 
-		service.setGold(groupNum,qq,gold-30);
-		service.addDrawTime(groupNum,qq,1);
+		service.setGold(group,qq,gold-30);
+		service.addDrawTime(group,qq,1);
 		return new Message().plus("恭喜你获得了"+girl.getName()+"\r\n")
 				.plus(factory.imageByFile(service.getGirlImage(girl.getName())).plus("要好好对待她哦"));
 	}
@@ -310,12 +310,9 @@ public class Controller
 					.plus(String.valueOf((int)gold)).plus("金币，失去").plus(String.valueOf(love)).plus("点亲密");
 			group.sendMessage(message);
 		},time*60*60*1000);
-		if(!map.containsKey(group.getId()))
-		{
-			Map<Long,String> tokens=new HashMap<>();
-			tokens.put(qq,token);
-			map.put(group.getId(),tokens);
-		}
+		var tokens = map.computeIfAbsent(group.getId(), k -> new HashMap<>());
+		tokens.put(qq,token);
+		map.put(group.getId(),tokens);
 		return new Message().plus("开始工作了，工作过程中其他活动无法进行\r\n\"取消工作\"可以取消 但是没有收益\r\n（如果骰主关机了那就会被强制停止无收益）");
 	}
 
@@ -329,7 +326,10 @@ public class Controller
 			if(s==null)
 				return null;
 			else
+			{
 				jobManager.deleteTimer(s);
+				m.remove(qq);
+			}
 		}
 		else
 			return null;

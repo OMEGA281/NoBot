@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ public class ImageGenerationService
 {
 	private enum Layout
 	{
-		w2(2),w3(3), w4(4), w5(5), w6(6),w7(7),w8(8),w9(9),w10(10);
+		w2(2),w3(3), w4(4), w5(5), w6(6),w7(7),w8(8),w9(9),w10(10),w11(11),w12(12),w13(13);
 		@Getter
 		private int width;
 
@@ -46,8 +47,12 @@ public class ImageGenerationService
 			layout = Layout.w8;
 		else if(map.size()<99)
 			layout= Layout.w9;
-		else
+		else if(map.size()<120)
 			layout=Layout.w10;
+		else if(map.size()<143)
+			layout=Layout.w11;
+		else
+			layout=Layout.w12;
 
 		int width= layout.width;
 		int height=imageList.size()/width+1;
@@ -83,8 +88,7 @@ public class ImageGenerationService
 	private HashMap<BufferedImage, BufferedImage> getImage(Map<String, File> list)
 	{
 		HashMap<BufferedImage, BufferedImage> bufferedImages = new HashMap<>();
-		for (Map.Entry<String, File> entry : list.entrySet())
-		{
+		list.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry ->{
 			File file = entry.getValue();
 			try
 			{
@@ -123,7 +127,7 @@ public class ImageGenerationService
 			catch (IOException ignored)
 			{
 			}
-		}
+		});
 		return bufferedImages;
 	}
 }

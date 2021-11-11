@@ -405,7 +405,7 @@ public class Service implements GirlPool
 		if(master==null)
 			throw new NoMasterExceptionRecordException(groupNum,userNum);
 		int i=master.getActive()+active;
-		master.setActive(active);
+		master.setActive(i);
 		masterDAO.update(master);
 		return i;
 	}
