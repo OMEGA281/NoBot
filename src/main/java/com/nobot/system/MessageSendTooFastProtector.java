@@ -5,11 +5,14 @@ import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.annotation.JobCenter;
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent;
+import com.IceCreamQAQ.Yu.job.JobManager;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.event.SendMessageEvent;
+import com.icecreamqaq.yuq.message.Message;
 import com.nobot.plugin.lor.entity.Game;
 import lombok.var;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +25,9 @@ public class MessageSendTooFastProtector
 	public static final long statisticalTime=3*1000;
 	public static final int messageSendLimit=9;
 	public static final int lockTime= 60 * 1000;
+
+	@Inject
+	private JobManager jobManager;
 
 	Map<Long,Integer> privateMap=new ConcurrentHashMap<>();
 	Map<Long,Integer> groupMap=new ConcurrentHashMap<>();
@@ -70,7 +76,7 @@ public class MessageSendTooFastProtector
 			var time = addGroupTime(contact.getId());
 			if(time>messageSendLimit)
 			{
-				contact.sendMessage("在"+statisticalTime/1000+"秒内消息发送事件达到"+time+"次，锁定"+lockTime/1000+"秒");
+//				contact.sendMessage("在"+statisticalTime/1000+"秒内消息发送事件达到"+time+"次，锁定"+lockTime/1000+"秒");
 				lockGroup(contact.getId());
 			}
 		}
@@ -84,7 +90,7 @@ public class MessageSendTooFastProtector
 			var time = addPrivateTime(contact.getId());
 			if(time>messageSendLimit)
 			{
-				contact.sendMessage("在"+statisticalTime/1000+"秒内消息发送事件达到"+time+"次，锁定"+lockTime/1000+"秒");
+//				contact.sendMessage("在"+statisticalTime/1000+"秒内消息发送事件达到"+time+"次，锁定"+lockTime/1000+"秒");
 				lockPrivate(contact.getId());
 			}
 		}
@@ -101,11 +107,13 @@ public class MessageSendTooFastProtector
 
 	private void lockPrivate(long user)
 	{
-		new Thread(new LockThread(privateLock,user)).start();
+		privateLock.add(user);
+		jobManager.registerTimer(() -> privateLock.remove(user), 60 * 1000);
 	}
 	private void lockGroup(long group)
 	{
-		new Thread(new LockThread(groupLock,group)).start();
+		groupLock.add(group);
+		jobManager.registerTimer(() -> groupLock.remove(group), 60 * 1000);
 	}
 
 	@Cron("3s")
