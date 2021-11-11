@@ -299,8 +299,8 @@ public class BlackJack
 	{
 		if(gold==0)
 			return;
-		service.addGold(winner,group,gold);
-		service.addGold(loser,group,-gold);
+		service.addGold(group, winner, gold);
+		service.addGold(group, loser, -gold);
 	}
 	@Catch(error = NumberFormatException.class)
 	public void numError(Group group)

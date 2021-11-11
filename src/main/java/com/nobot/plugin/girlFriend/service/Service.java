@@ -37,7 +37,7 @@ public class Service implements GirlPool
 	Random random=new Random();
 
 	@Transactional
-	public boolean setGirlMaster(long groupNum,long girlID,long masterNum)
+	public boolean setGirlMaster(long groupNum, long masterNum, long girlID)
 	{
 		var girl=girlDAO.findById(girlID);
 		if(girl==null)
@@ -368,7 +368,7 @@ public class Service implements GirlPool
 	}
 
 	@Transactional
-	public int addGold(long groupNum,long userNum,int gold)
+	public int addGold(long groupNum, long userNum, int gold)
 	{
 		var master=masterDAO.findByGroupNumAndUserNum(groupNum,userNum);
 		if(master==null)
