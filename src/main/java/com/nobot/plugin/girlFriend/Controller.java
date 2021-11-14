@@ -305,7 +305,7 @@ public class Controller
 			}
 			int love=4*time;
 			service.addGold(group.getId(),qq,(int)gold);
-			service.addActive(group.getId(),qq,love);
+			service.addActive(group.getId(),qq,-love);
 			var message= new Message().plus(factory.at(qq)).plus("工作完毕，获得")
 					.plus(String.valueOf((int)gold)).plus("金币，失去").plus(String.valueOf(love)).plus("点亲密");
 			var groupMap=map.get(group.getId());
