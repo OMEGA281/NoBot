@@ -18,6 +18,9 @@ import com.nobot.plugin.girlFriend.entity.Master;
 import com.nobot.plugin.girlFriend.service.ImageGenerationService;
 import com.nobot.plugin.girlFriend.service.Service;
 import com.nobot.system.annotation.CreateDir;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.var;
 import net.coobird.thumbnailator.Thumbnails;
 
@@ -34,7 +37,59 @@ import java.util.Random;
 @CreateDir(GirlPool.GIRL_POOL)
 public class Controller
 {
-	private Map<Long,Map<Long,String>> map=new HashMap<>();
+	private class Work
+	{
+		@Getter
+		private long startTime;
+		@Getter
+		private long duration;
+		private Runnable onEndRunnable;
+		private Thread thread;
+		@Getter
+		private boolean end;
+		public Work(Runnable runnable,long duration)
+		{
+			this.duration=duration;
+			startTime=System.currentTimeMillis();
+			onEndRunnable=runnable;
+			thread=new Thread(new Runnable()
+			{
+				public boolean flag;
+				@Override
+				public void run()
+				{
+					flag=true;
+					try
+					{
+						Thread.sleep(duration);
+					}
+					catch (InterruptedException e)
+					{
+						flag=false;
+						end=true;
+					}
+					if(flag)
+					{
+						new Thread(onEndRunnable).start();
+						end=true;
+					}
+				}
+			});
+			end=false;
+		}
+
+		public long getEndTime()
+		{
+			return startTime+duration;
+		}
+
+		public void stop()
+		{
+			thread.interrupt();
+		}
+	}
+
+	private Map<Long,Map<Long,Work>> map=new HashMap<>();
 	private Random random=new Random();
 	@Inject
 	private Service service;
@@ -286,7 +341,7 @@ public class Controller
 	@Action("打工{num}小时")
 	public Message work(Group group ,long qq,String num)
 	{
-		Map<Long,String> m;
+		Map<Long,Work> m;
 		if(map.containsKey(group.getId()))
 		{
 			m=map.get(group.getId());
@@ -297,7 +352,7 @@ public class Controller
 		int time=Integer.parseInt(num);
 		if(time<=0||time>24)
 			return null;
-		String token=jobManager.registerTimer(() -> {
+		Work token=new Work(() -> {
 			long gold=0L;
 			for (int i=0;i<time;i++)
 			{
@@ -330,7 +385,7 @@ public class Controller
 				return null;
 			else
 			{
-				jobManager.deleteTimer(s);
+				s.stop();
 				m.remove(qq);
 			}
 		}
