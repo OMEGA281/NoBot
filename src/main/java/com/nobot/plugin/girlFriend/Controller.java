@@ -82,6 +82,10 @@ public class Controller
 		{
 			return startTime+duration;
 		}
+		public long getReleaseTime()
+		{
+			return duration-(System.currentTimeMillis()-startTime);
+		}
 
 		public void stop()
 		{
@@ -98,9 +102,6 @@ public class Controller
 	private MessageItemFactory factory;
 
 	@Inject
-	private JobManager jobManager;
-
-	@Inject
 	private ImageGenerationService imageGenerationService;
 
 	@Before(except = {"open","simulateDrawGirl","groupWifeStates"})
@@ -114,17 +115,13 @@ public class Controller
 	@Before(except = {"simulateDrawGirl","groupWifeStates","myInfo","market","findWife","stopWork","GMSendMoney"})
 	public void isWorking(long group,long qq, BotActionContext actionContext)
 	{
-		boolean b;
 		if(map.containsKey(group))
 		{
 			var m=map.get(group);
 			var s=m.get(qq);
-			b= s != null;
+			if(s!=null)
+				throw new Message().plus("你还在打工中，还有").plus(String.valueOf(s.getReleaseTime())).toThrowable();
 		}
-		else
-			b= false;
-		if(b)
-			throw new DoNone();
 	}
 
 	@Action("开户")
