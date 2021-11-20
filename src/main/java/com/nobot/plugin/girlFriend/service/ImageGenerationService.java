@@ -7,9 +7,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ImageGenerationService
 {
@@ -27,107 +26,105 @@ public class ImageGenerationService
 
 	public BufferedImage makeImage(Map<String, File> imageList) throws IOException
 	{
-		HashMap<BufferedImage, BufferedImage> map = getImage(imageList);
 		Layout layout;
-		if (map.size() == 0)
+		if (imageList.size() == 0)
 			return null;
-		else if (map.size()<6)
+		else if (imageList.size()<6)
 			layout= Layout.w2;
-		else if (map.size() < 12)
+		else if (imageList.size() < 12)
 			layout = Layout.w3;
-		else if (map.size() < 20)
+		else if (imageList.size() < 20)
 			layout = Layout.w4;
-		else if (map.size() < 35)
+		else if (imageList.size() < 35)
 			layout = Layout.w5;
-		else if(map.size()<48)
+		else if(imageList.size()<48)
 			layout = Layout.w6;
-		else if(map.size()<63)
+		else if(imageList.size()<63)
 			layout = Layout.w7;
-		else if(map.size()<80)
+		else if(imageList.size()<80)
 			layout = Layout.w8;
-		else if(map.size()<99)
+		else if(imageList.size()<99)
 			layout= Layout.w9;
-		else if(map.size()<120)
+		else if(imageList.size()<120)
 			layout=Layout.w10;
-		else if(map.size()<143)
-			layout=Layout.w11;
+		else if (imageList.size() < 143)
+			layout = Layout.w11;
+		else if (imageList.size() < 170)
+			layout = Layout.w12;
 		else
-			layout=Layout.w12;
+			layout = Layout.w13;
 
-		int width= layout.width;
-		int height=imageList.size()/width+1;
+		int width = layout.width;
+		int height = imageList.size() / width + 1;
 
-		BufferedImage image=new BufferedImage(
-				width*300+(width+1)*30,height*(300+50)+(height+1)*30,BufferedImage.TYPE_INT_ARGB);
-		Graphics2D graphics2D=image.createGraphics();
+		BufferedImage image = new BufferedImage(width * 300 + (width + 1) * 30
+				, height * (300 + 50) + (height + 1) * 30, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D graphics2D = image.createGraphics();
 		graphics2D.setColor(Color.WHITE);
-		graphics2D.fillRect(0,0,image.getWidth(),image.getHeight());
-		int x=1,y=1;
-		for (Map.Entry<BufferedImage,BufferedImage> entry:map.entrySet())
+		graphics2D.fillRect(0, 0, image.getWidth(), image.getHeight());
+
+		imageList.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(new Consumer<Map.Entry<String, File>>()
 		{
-			int imageWidth=(x-1)*300+x*30;
-			int imageHeight=(y-1)*(300+50)+y*30;
-			int textWidth=imageWidth;
-			int textHeight=imageHeight+300;
+			int x = 1, y = 1;
 
-			graphics2D.drawImage(
-					Thumbnails.of(entry.getValue()).size(300,300).sourceRegion(0,0,300,300).asBufferedImage(),
-					imageWidth,imageHeight,null);
-			graphics2D.drawImage(entry.getKey(),textWidth,textHeight,null);
-			x++;
-			if(x>width)
+			@Override
+			public void accept(Map.Entry<String, File> entry)
 			{
-				x=1;
-				y++;
-			}
-		}
-		graphics2D.dispose();
-		return image;
-	}
+				int imageWidth = (x - 1) * 300 + x * 30;
+				int imageHeight = (y - 1) * (300 + 50) + y * 30;
+				int textWidth = imageWidth;
+				int textHeight = imageHeight + 300;
 
-	private HashMap<BufferedImage, BufferedImage> getImage(Map<String, File> list)
-	{
-		HashMap<BufferedImage, BufferedImage> bufferedImages = new HashMap<>();
-		list.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry ->{
-			File file = entry.getValue();
-			try
-			{
-				BufferedImage key=new BufferedImage(300,50,BufferedImage.TYPE_INT_RGB);
-				Graphics2D graphics2D= key.createGraphics();
+				BufferedImage key = new BufferedImage(300, 50, BufferedImage.TYPE_INT_RGB);
+				Graphics2D keyGraphics = key.createGraphics();
 //				key=graphics2D.getDeviceConfiguration().createCompatibleImage(300,100, Transparency.TRANSLUCENT);
 //				graphics2D.dispose();
 //				graphics2D= key.createGraphics();
-				Font font=new Font("宋体",Font.BOLD,33);
-				graphics2D.setFont(font);
-				graphics2D.rotate(0f);
-				graphics2D.setColor(Color.WHITE);
-				graphics2D.setBackground(Color.WHITE);
-				graphics2D.fillRect(0,0,300,50);
-				graphics2D.setColor(Color.BLACK);
-				graphics2D.setRenderingHint(
-						RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-				FontMetrics fontMetrics=graphics2D.getFontMetrics(font);
-				int textWidth=fontMetrics.stringWidth(entry.getKey());
+				Font font = new Font("宋体", Font.BOLD, 33);
+				keyGraphics.setFont(font);
+				keyGraphics.rotate(0f);
+				keyGraphics.setColor(Color.WHITE);
+				keyGraphics.setBackground(Color.WHITE);
+				keyGraphics.fillRect(0, 0, 300, 50);
+				keyGraphics.setColor(Color.BLACK);
+				keyGraphics.setRenderingHint(
+						RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+				FontMetrics fontMetrics = keyGraphics.getFontMetrics(font);
+				int tW = fontMetrics.stringWidth(entry.getKey());
 				int startPlace;
-				while (textWidth>300)
+				while (tW > 300)
 				{
-					font=new Font("宋体",Font.BOLD,font.getSize()-2);
-					graphics2D.setFont(font);
-					fontMetrics=graphics2D.getFontMetrics(font);
-					textWidth=fontMetrics.stringWidth(entry.getKey());
+					font = new Font("宋体", Font.BOLD, font.getSize() - 2);
+					keyGraphics.setFont(font);
+					fontMetrics = keyGraphics.getFontMetrics(font);
+					tW = fontMetrics.stringWidth(entry.getKey());
 				}
-				startPlace=(300-textWidth)/2;
-				graphics2D.drawString(entry.getKey(),startPlace,35);
-				graphics2D.dispose();
+				startPlace = (300 - tW) / 2;
+				keyGraphics.drawString(entry.getKey(), startPlace, 35);
+				keyGraphics.dispose();
 
-				BufferedImage value=Thumbnails.of(file).size(300, 300)
-						.asBufferedImage();
-				bufferedImages.put(key,value);
-			}
-			catch (IOException ignored)
-			{
+				try
+				{
+					BufferedImage value = Thumbnails.of(entry.getValue()).size(300, 300).asBufferedImage();
+
+					keyGraphics.drawImage(Thumbnails.of(value).size(300, 300)
+									.sourceRegion(0, 0, 300, 300).asBufferedImage(),
+							imageWidth, imageHeight, null);
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+				keyGraphics.drawImage(key, textWidth, textHeight, null);
+				x++;
+				if (x > width)
+				{
+					x = 1;
+					y++;
+				}
 			}
 		});
-		return bufferedImages;
+		graphics2D.dispose();
+		return image;
 	}
 }
