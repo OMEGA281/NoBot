@@ -77,9 +77,7 @@ public class ImageGenerationService
 
 				BufferedImage key = new BufferedImage(300, 50, BufferedImage.TYPE_INT_RGB);
 				Graphics2D keyGraphics = key.createGraphics();
-//				key=graphics2D.getDeviceConfiguration().createCompatibleImage(300,100, Transparency.TRANSLUCENT);
-//				graphics2D.dispose();
-//				graphics2D= key.createGraphics();
+
 				Font font = new Font("宋体", Font.BOLD, 33);
 				keyGraphics.setFont(font);
 				keyGraphics.rotate(0f);
@@ -107,7 +105,7 @@ public class ImageGenerationService
 				{
 					BufferedImage value = Thumbnails.of(entry.getValue()).size(300, 300).asBufferedImage();
 
-					keyGraphics.drawImage(Thumbnails.of(value).size(300, 300)
+					graphics2D.drawImage(Thumbnails.of(value).size(300, 300)
 									.sourceRegion(0, 0, 300, 300).asBufferedImage(),
 							imageWidth, imageHeight, null);
 				}
@@ -115,7 +113,7 @@ public class ImageGenerationService
 				{
 					e.printStackTrace();
 				}
-				keyGraphics.drawImage(key, textWidth, textHeight, null);
+				graphics2D.drawImage(key, textWidth, textHeight, null);
 				x++;
 				if (x > width)
 				{
