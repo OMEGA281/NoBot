@@ -75,6 +75,7 @@ public class Controller
 					}
 				}
 			});
+			thread.start();
 			end=false;
 		}
 
@@ -120,7 +121,8 @@ public class Controller
 			var m=map.get(group);
 			var s=m.get(qq);
 			if(s!=null)
-				throw new Message().plus("你还在打工中，还有").plus(String.valueOf(s.getReleaseTime())).toThrowable();
+				throw new Message().plus("你还在打工中，还有")
+						.plus(String.format("%1$3.1d小时",s.getReleaseTime() / (60L * 60))).toThrowable();
 		}
 	}
 
