@@ -21,12 +21,13 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 	private int tureBPNum,tureMaxOrMinNum;
 
 	private int[] randomDiceArray,extraDiceArray,afterDiceArray,selectDiceArray;
-	private String expression;
+	@Getter
 	private int result;
 
 	private String resource;
 	private ArrayList<Object> list;
 
+	//FIXME:将来将这里和下一个方法结合在一起，现在混淆了用法
 	protected RandomExpression(Random random,String resource)
 	{
 		this.random=random;
@@ -226,16 +227,90 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 
 		if(maxOrMinMode!=GET_ALL_DICE_MODE)
 		{
-			if(maxOrMinMode==GET_MIN_DICE_MODE)
-				selectDiceArray=Arrays.stream(afterDiceArray).sorted().limit(selectDiceArray.length).toArray();
+			int[] array;
+			if(bonusOrPunishMode!=NO_PUNISH_AND_BONUS)
+				array=afterDiceArray;
 			else
-				selectDiceArray=Arrays.stream(afterDiceArray).boxed().sorted(Comparator.reverseOrder())
+				array=randomDiceArray;
+			if(maxOrMinMode==GET_MIN_DICE_MODE)
+				selectDiceArray=Arrays.stream(array).sorted().limit(selectDiceArray.length).toArray();
+			else
+				selectDiceArray=Arrays.stream(array).boxed().sorted(Comparator.reverseOrder())
 						.limit(selectDiceArray.length).mapToInt(value -> value).toArray();
 			result= Arrays.stream(selectDiceArray).sum();
 		}
 		if(bonusOrPunishMode==NO_PUNISH_AND_BONUS)
 			result= Arrays.stream(randomDiceArray).sum();
 		result= Arrays.stream(afterDiceArray).sum();
+	}
+
+	@Override
+	public String getShowExpression()
+	{
+		var builder=new StringBuilder();
+		if(randomDiceArray.length!=1)
+		{
+			builder.append('(');
+			for (int i : randomDiceArray)
+				builder.append(i).append("+");
+			builder.delete(builder.length()-1,builder.length()).append(')');
+		}
+		else
+			builder.append(randomDiceArray[0]);
+		if(bonusOrPunishMode!=NO_PUNISH_AND_BONUS)
+		{
+			builder.append('{');
+			if(bonusOrPunishMode==BONUS_MODE)
+				builder.append(symbol_b);
+			else
+				builder.append(symbol_p);
+			builder.append(':');
+			for (int i : extraDiceArray)
+				builder.append(i).append(',');
+			builder.delete(builder.length()-1,builder.length()).append('}');
+		}
+		if(maxOrMinMode!=GET_ALL_DICE_MODE)
+		{
+			builder.append('[');
+			if(maxOrMinMode==GET_MAX_DICE_MODE)
+				builder.append(symbol_k);
+			else
+				builder.append(symbol_q);
+			builder.append(':');
+			for (int i : selectDiceArray)
+				builder.append(i).append(',');
+			builder.delete(builder.length()-1,builder.length()).append(']');
+		}
+		return builder.toString();
+	}
+
+	@Override
+	public String getTrueExpression()
+	{
+		int[] array;
+		if(maxOrMinMode!=GET_ALL_DICE_MODE)
+			array=selectDiceArray;
+		else if(bonusOrPunishMode!=NO_PUNISH_AND_BONUS)
+			array=afterDiceArray;
+		else
+			array=randomDiceArray;
+		if(array.length==1)
+			return String.valueOf(array[0]);
+		else
+		{
+			var builder=new StringBuilder();
+			builder.append('(');
+			for (int i : array)
+				builder.append(i).append('+');
+			builder.delete(builder.length()-1,builder.length()).append(')');
+			return builder.toString();
+		}
+	}
+
+	@Override
+	public String getResourceExpression()
+	{
+		return resource;
 	}
 
 	private Integer getInteger(int index)
