@@ -16,6 +16,7 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 	private int bonusNum,punishNum;
 	private int bigDiceNum,smallDiceNum;
 
+	private boolean onlyNumber;
 	@Getter(AccessLevel.PACKAGE)
 	private int bonusOrPunishMode, maxOrMinMode;
 	private int tureBPNum,tureMaxOrMinNum;
@@ -33,15 +34,31 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 		this.random=random;
 		this.resource=resource;
 		list=new ArrayList<>();
-		checkExpression();
-		randomDiceArray=new int[diceNum];
-		if(bonusOrPunishMode!=NO_PUNISH_AND_BONUS)
+		if(resource.contains(String.valueOf(symbol_d)))
 		{
-			extraDiceArray = new int[tureBPNum];
-			afterDiceArray=new int[tureBPNum];
+			onlyNumber=false;
+			checkExpression();
+			randomDiceArray = new int[diceNum];
+			if (bonusOrPunishMode != NO_PUNISH_AND_BONUS)
+			{
+				extraDiceArray = new int[tureBPNum];
+				afterDiceArray = new int[randomDiceArray.length];
+			}
+			if (maxOrMinMode != GET_ALL_DICE_MODE)
+				selectDiceArray = new int[tureMaxOrMinNum];
 		}
-		if(maxOrMinMode!=GET_ALL_DICE_MODE)
-			selectDiceArray=new int[tureMaxOrMinNum];
+		else
+		{
+			onlyNumber = true;
+			try
+			{
+				result=Integer.parseInt(resource);
+			}
+			catch (NumberFormatException e)
+			{
+				throw new ExpressionException(resource,"不存在D时无法使用其他修饰符");
+			}
+		}
 	}
 
 	private void checkExpression()
@@ -66,12 +83,17 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 					sb.append(c);
 					break;
 				default:
-					list.add(Integer.parseInt(sb.toString()));
-					sb=new StringBuilder();
+					if(sb.length()!=0)
+					{
+						list.add(Integer.parseInt(sb.toString()));
+						sb = new StringBuilder();
+					}
 					list.add(c);
 					break;
 			}
 		}
+		if(sb.length()!=0)
+			list.add(Integer.parseInt(sb.toString()));
 //		识别并处理控制符
 		for (int i=0;i<list.size();i++)
 		{
@@ -132,7 +154,6 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 							diceUpperLimit=100;
 						else
 							diceUpperLimit=upLimit;
-						diceDownLimit=1;
 						break;
 					default:
 						throw new ExpressionException(resource,"无法识别的控制符号："+ (char) object);
@@ -144,10 +165,13 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 		if(tureBPNum>0)
 			bonusOrPunishMode =BONUS_MODE;
 		else if(tureBPNum<0)
-			bonusOrPunishMode =NO_PUNISH_AND_BONUS;
+		{
+			bonusOrPunishMode = PUNISH_MODE;
+			tureBPNum=-tureBPNum;
+		}
 		else
-			bonusOrPunishMode =PUNISH_MODE;
-		if((diceDownLimit!=1||diceUpperLimit!=100||diceNum!=1)&&bonusOrPunishMode==NO_PUNISH_AND_BONUS)
+			bonusOrPunishMode =NO_PUNISH_AND_BONUS;
+		if((diceDownLimit!=1||diceUpperLimit!=100||diceNum!=1)&&bonusOrPunishMode!=NO_PUNISH_AND_BONUS)
 			throw new ExpressionException(resource,"非单独一个百分骰不启用b和p控制符号");
 //		获得正式的取大或者取小值，同时存在报错，检测是否取值超过了总值
 		if(bigDiceNum!=0&&smallDiceNum!=0)
@@ -171,6 +195,8 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 	@Override
 	public void calculation()
 	{
+		if(onlyNumber)
+			return;
 		for (int i=0;i<diceNum;i++)
 		{
 			if(diceUpperLimit==diceDownLimit)
@@ -213,7 +239,7 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 						afterDiceArray[i]=tenDigit*10+singleDigit;
 					}
 				}
-				else
+				else if(bonusOrPunishMode==PUNISH_MODE)
 				{
 					if(tenDigit<replaceNum)
 					{
@@ -221,7 +247,8 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 						afterDiceArray[i]=tenDigit*10+singleDigit;
 					}
 				}
-				afterDiceArray[i]=num;
+				else
+					afterDiceArray[i]=num;
 			}
 		}
 
@@ -241,12 +268,15 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 		}
 		if(bonusOrPunishMode==NO_PUNISH_AND_BONUS)
 			result= Arrays.stream(randomDiceArray).sum();
-		result= Arrays.stream(afterDiceArray).sum();
+		else
+			result= Arrays.stream(afterDiceArray).sum();
 	}
 
 	@Override
 	public String getShowExpression()
 	{
+		if(onlyNumber)
+			return String.valueOf(result);
 		var builder=new StringBuilder();
 		if(randomDiceArray.length!=1)
 		{
@@ -287,6 +317,8 @@ public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
 	@Override
 	public String getTrueExpression()
 	{
+		if(onlyNumber)
+			return String.valueOf(result);
 		int[] array;
 		if(maxOrMinMode!=GET_ALL_DICE_MODE)
 			array=selectDiceArray;

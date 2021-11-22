@@ -12,10 +12,16 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import com.nobot.plugin.dice.entity.COCCard;
+import com.nobot.plugin.dice.expressionAnalyzer.ExpressionSorter;
+import com.nobot.plugin.dice.expressionAnalyzer.NumberExpressionAnalyzer;
+import lombok.var;
+import net.sourceforge.jeval.Evaluator;
 
 import javax.inject.Inject;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 
 @GroupController
 @PrivateController
@@ -44,6 +50,14 @@ public class Controller
 
 		actionContext.set("isGroup",isGroup);
 		actionContext.set("currentName",currentName);
+	}
+
+	@Action("测试{s}")
+	public String testNew(String s)
+	{
+		var analyzer=ExpressionSorter.test(new Evaluator(),new Random(),s.toUpperCase(Locale.ROOT));
+		analyzer.calculation();
+		return analyzer.getShowExpression()+"="+analyzer.getTrueExpression()+"="+analyzer.getResult();
 	}
 
 	@Action(".r")

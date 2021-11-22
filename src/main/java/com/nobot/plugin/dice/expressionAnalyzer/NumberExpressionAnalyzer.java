@@ -2,6 +2,7 @@ package com.nobot.plugin.dice.expressionAnalyzer;
 
 import lombok.Getter;
 import lombok.var;
+import net.sourceforge.jeval.EvaluationException;
 import net.sourceforge.jeval.Evaluator;
 
 import java.util.ArrayList;
@@ -50,8 +51,11 @@ public class NumberExpressionAnalyzer implements ExpressionAnalyzer
 					break;
 			}
 		}
-		list.add(builder.toString());
-
+		if(builder.length()!=0)
+		{
+			var part=new RandomExpression(random, builder.toString());
+			list.add(part);
+		}
 	}
 
 	@Override
@@ -74,8 +78,16 @@ public class NumberExpressionAnalyzer implements ExpressionAnalyzer
 				showBuilder.append(o);
 			}
 		}
-		this.trueExpression=trueExpression;
-		this.showExpression=showExpression;
+		this.trueExpression=trueBuilder.toString();
+		this.showExpression=showBuilder.toString();
+		try
+		{
+			result= (int) evaluator.getNumberResult(trueExpression);
+		}
+		catch (EvaluationException e)
+		{
+			throw new ExpressionException(expression,e.getMessage());
+		}
 	}
 
 
