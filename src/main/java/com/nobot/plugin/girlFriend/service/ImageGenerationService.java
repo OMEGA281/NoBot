@@ -128,7 +128,7 @@ public class ImageGenerationService
 		var itemList = new ArrayList<Map.Entry<String, File>>();
 		stream.forEach(entry -> {
 			itemList.add(entry);
-			if (imageList.size() > 80)
+			if (imageList.size() >= 80)
 			{
 				try
 				{
@@ -146,7 +146,7 @@ public class ImageGenerationService
 				}
 			}
 		});
-		if (!imageList.isEmpty())
+		if (!itemList.isEmpty())
 		{
 			try
 			{
