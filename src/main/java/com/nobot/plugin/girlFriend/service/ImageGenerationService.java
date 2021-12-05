@@ -140,10 +140,7 @@ public class ImageGenerationService
 				catch (IOException ignored)
 				{
 				}
-				finally
-				{
-					itemList.clear();
-				}
+				itemList.clear();
 			}
 		});
 		if (!itemList.isEmpty())
