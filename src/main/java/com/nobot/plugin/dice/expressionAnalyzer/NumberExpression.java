@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class NumberExpressionAnalyzer implements ExpressionAnalyzer
+public class NumberExpression implements Expression
 {
 	private Evaluator evaluator;
 	private Random random;
@@ -23,7 +23,7 @@ public class NumberExpressionAnalyzer implements ExpressionAnalyzer
 	private int result;
 	private	List<Object> list=new ArrayList<>();
 
-	protected NumberExpressionAnalyzer(Evaluator evaluator,Random random, String expression)
+	protected NumberExpression(Evaluator evaluator, Random random, String expression)
 	{
 		this.evaluator=evaluator;
 		this.random=random;
@@ -40,7 +40,7 @@ public class NumberExpressionAnalyzer implements ExpressionAnalyzer
 				case '=':
 					if(builder.length()!=0)
 					{
-						var part=new RandomExpression(random, builder.toString());
+						var part=ExpressionSorter.getSingleExpression(random,builder.toString());
 						list.add(part);
 						builder=new StringBuilder();
 					}
@@ -53,7 +53,7 @@ public class NumberExpressionAnalyzer implements ExpressionAnalyzer
 		}
 		if(builder.length()!=0)
 		{
-			var part=new RandomExpression(random, builder.toString());
+			var part=ExpressionSorter.getSingleExpression(random,builder.toString());
 			list.add(part);
 		}
 	}
@@ -65,9 +65,9 @@ public class NumberExpressionAnalyzer implements ExpressionAnalyzer
 		var showBuilder=new StringBuilder();
 		for (Object o : list)
 		{
-			if (o instanceof RandomExpression)
+			if (o instanceof SingleExpression)
 			{
-				var part=(RandomExpression)o;
+				var part=(SingleExpression)o;
 				part.calculation();
 				trueBuilder.append(part.getTrueExpression());
 				showBuilder.append(part.getShowExpression());

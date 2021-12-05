@@ -13,7 +13,6 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import com.nobot.plugin.dice.entity.COCCard;
 import com.nobot.plugin.dice.expressionAnalyzer.ExpressionSorter;
-import com.nobot.plugin.dice.expressionAnalyzer.NumberExpressionAnalyzer;
 import lombok.var;
 import net.sourceforge.jeval.Evaluator;
 

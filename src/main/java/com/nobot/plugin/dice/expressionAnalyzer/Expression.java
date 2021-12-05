@@ -1,6 +1,6 @@
 package com.nobot.plugin.dice.expressionAnalyzer;
 
-public interface ExpressionAnalyzer
+public interface Expression
 {
 	/**按照解析的表达式进行一次计算*/
 	void calculation();

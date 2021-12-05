@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
 
-public class RandomExpression implements SpecialSymbol,ExpressionAnalyzer
+public class RandomExpression implements SpecialSymbol, SingleExpression
 {
 	private Random random;
 	private int diceNum=1,diceDownLimit,diceUpperLimit;
