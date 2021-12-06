@@ -74,6 +74,7 @@ public class Controller
 				}
 			});
 			end = false;
+			thread.start();
 		}
 
 		public long getEndTime()
@@ -119,7 +120,8 @@ public class Controller
 			var m = map.get(group);
 			var s = m.get(qq);
 			if (s != null)
-				throw new Message().plus("你还在打工中，还有").plus(String.valueOf(s.getReleaseTime())).toThrowable();
+				throw new Message()
+						.plus(String.format("你还在打工中，还有%1$.2f小时",s.getReleaseTime()/60F/60)).toThrowable();
 		}
 	}
 
