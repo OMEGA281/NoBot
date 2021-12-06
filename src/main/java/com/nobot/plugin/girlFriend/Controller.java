@@ -121,7 +121,7 @@ public class Controller
 			var s = m.get(qq);
 			if (s != null)
 				throw new Message()
-						.plus(String.format("你还在打工中，还有%1$.2f小时",s.getReleaseTime()/60F/60)).toThrowable();
+						.plus(String.format("你还在打工中，还有%1$.2f小时",s.getReleaseTime()/60F/60/1000)).toThrowable();
 		}
 	}
 
