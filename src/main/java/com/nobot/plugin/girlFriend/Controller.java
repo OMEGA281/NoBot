@@ -392,8 +392,8 @@ public class Controller
 			return null;
 		if (at == -1)
 			for (long member : qq.getGroup().getMembers().keySet())
-				service.addGold(member, qq.getGroup().getId(), gold);
-		service.addGold(at, qq.getGroup().getId(), gold);
+				service.addGold(qq.getGroup().getId(),member,gold);
+		service.addGold(qq.getGroup().getId(),at, gold);
 		return new Message().plus("给予").plus(at == -1 ? "全体" : Long.toString(at))
 				.plus(Integer.toString(gold)).plus("金币");
 	}
