@@ -16,6 +16,9 @@ public interface SpecialSymbol
 	/*惩罚骰*/
 	char symbol_p='P';
 
+	char symbol_r='R';
+	char symbol_a='A';
+
 	int PUNISH_MODE=-1;
 	int BONUS_MODE=1;
 	int NO_PUNISH_AND_BONUS=0;

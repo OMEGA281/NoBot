@@ -1,8 +1,7 @@
 package com.nobot.plugin.dice;
 
-import com.IceCreamQAQ.Yu.annotation.Action;
-import com.IceCreamQAQ.Yu.annotation.Before;
-import com.IceCreamQAQ.Yu.annotation.Catch;
+import com.IceCreamQAQ.Yu.annotation.*;
+import com.IceCreamQAQ.Yu.event.events.AppStartEvent;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.PrivateController;
 import com.icecreamqaq.yuq.controller.BotActionContext;
@@ -12,6 +11,7 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import com.nobot.plugin.dice.entity.COCCard;
+import com.nobot.plugin.dice.expressionAnalyzer.Expression;
 import com.nobot.plugin.dice.expressionAnalyzer.ExpressionSorter;
 import lombok.var;
 import net.sourceforge.jeval.Evaluator;
@@ -24,14 +24,20 @@ import java.util.Random;
 
 @GroupController
 @PrivateController
+@EventListener
 public class Controller
 {
 	@Inject
-	DataService dataService;
+	private DataService dataService;
 	@Inject
-	Dice dice;
+	private Dice dice;
 	@Inject
-	Verification verification;
+	private Verification verification;
+	@Inject
+	private ExpressionSorter sorter;
+
+	private Evaluator evaluator;
+	private Random random;
 
 	@Before
 	private void getMessageType(BotActionContext actionContext, Member qq, Friend sender)
@@ -65,13 +71,25 @@ public class Controller
 		return r("d");
 	}
 
-	@Action(".r {d}")
+	@Action(".r{d}")
+	@Synonym({"。r{d}",".R{d}","。R{d}","。r {d}",".R {d}","。R {d}",".r {d}"})
 	public String r(String d)
 	{
-		return dice.getFullResultExpression(d,1);
+		var expressions=sorter.sort(evaluator,random,d);
+		var sb=new StringBuilder();
+		for (Expression expression : expressions)
+		{
+			expression.calculation();
+			sb.append(expression.getResourceExpression()).append('=')
+					.append(expression.getShowExpression()).append('=')
+					.append(expression.getResult()).append("\r\n");
+		}
+		sb.delete(sb.length()-1,sb.length());
+		return sb.toString();
 	}
 
-	@Action(".rh {d}")
+	@Action(".rh{d}")
+	@Synonym({"。rh{d}",".RH{d}","。RH{d}","。rh {d}",".RH {d}","。RH {d}",".rh {d}"})
 	public String rh(Contact qq,boolean isGroup,String d,String currentName)
 	{
 		if(!isGroup)
@@ -125,5 +143,12 @@ public class Controller
 			map.put("a",1);
 		}
 		return null;
+	}
+
+	@Event
+	public void init(AppStartEvent event)
+	{
+		evaluator=new Evaluator();
+		random=new Random();
 	}
 }

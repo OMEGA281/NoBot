@@ -15,13 +15,6 @@ public class VerificationExpression implements Expression,SpecialSymbol
 	VerificationExpression(String s)
 	{
 		var list=ExpressionSorter.splitString(s);
-		for (String string : list)
-		{
-			switch (string)
-			{
-				case S
-			}
-		}
 	}
 
 	@Override
