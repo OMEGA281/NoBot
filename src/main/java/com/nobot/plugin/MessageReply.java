@@ -11,6 +11,7 @@ import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.event.GroupMessageEvent;
 import com.icecreamqaq.yuq.event.MessageEvent;
 import com.icecreamqaq.yuq.message.Message;
+import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.nobot.system.annotation.UnzipFile;
 import com.nobot.tool.XmlReader;
 import org.jdom2.Document;
@@ -36,6 +37,8 @@ public class MessageReply
 	private File file=new File("MessageReply.xml");
 	private Map<Pattern,String[]> map=new ConcurrentHashMap<>();
 	private Random random=new Random();
+	@Inject
+	private MessageItemFactory factory;
 
 	private final String attributeKey="pattern";
 	private final Pattern replaceString=Pattern.compile("%(\\d+)%");
@@ -69,7 +72,8 @@ public class MessageReply
 					replyString=entry.getValue()[0];
 					break;
 				}
-				replyString=entry.getValue()[random.nextInt(entry.getValue().length)];
+				else
+					replyString=entry.getValue()[random.nextInt(entry.getValue().length)];
 				int x=matcher.groupCount();
 				groups=new String[x+1];
 				for(int i=0;i<=x;i++)
@@ -80,10 +84,12 @@ public class MessageReply
 		if (replyString==null)
 			return;
 //		TODO:添加回复词的分组
+
+		Message message=Message.Companion.toMessageByRainCode(replyString);
 		if(event instanceof GroupMessageEvent)
-			((GroupMessageEvent) event).getGroup().sendMessage(replyString);
+			((GroupMessageEvent) event).getGroup().sendMessage(message);
 		else
-			event.getSender().sendMessage(replyString);
+			event.getSender().sendMessage(message);
 	}
 	@Action("重新加载关键词")
 	public Message c_reloadPattern(long SOPNum, Contact qq) throws JDOMException, IOException

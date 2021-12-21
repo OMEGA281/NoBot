@@ -5,11 +5,9 @@ import com.IceCreamQAQ.Yu.annotation.Config;
 import com.IceCreamQAQ.Yu.annotation.Event;
 import com.IceCreamQAQ.Yu.annotation.EventListener;
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent;
-import com.icecreamqaq.yuq.RainVersion;
-import com.icecreamqaq.yuq.YuQ;
+import com.icecreamqaq.yuq.YuQVersion;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.PrivateController;
-import com.icecreamqaq.yuq.event.GroupMessageEvent;
 import com.icecreamqaq.yuq.event.MessageEvent;
 import com.icecreamqaq.yuq.event.SendMessageEvent;
 import com.icecreamqaq.yuq.message.Message;
@@ -49,7 +47,7 @@ public class BotInfo
 	@Inject
 	GroupStateService groupStateService;
 	@Inject
-	RainVersion rainVersion;
+	YuQVersion yuQVersion;
 
 	Instant startTime;
 	String version;
@@ -107,8 +105,8 @@ public class BotInfo
 	{
 		MessageLineQ messageLineQ=new MessageLineQ(new Message());
 		messageLineQ.text("NoBot").text("-").text(version==null?"未知版本":version).text("\r\n")
-				.text("[").text(rainVersion.runtimeName()+rainVersion.runtimeVersion()).text("\r\n")
-				.text("YuQ:"+rainVersion.apiVersion()).text("\r\n")
+				.text("[").text(yuQVersion.runtimeName()+ yuQVersion.runtimeVersion()).text("\r\n")
+				.text("YuQ:"+ yuQVersion.apiVersion()).text("\r\n")
 				.text("Yu-Core:0.2.0.0-DEV13").text("]").text("\r\n")
 				.text(System.getProperty("os.name")).text("\\").text(System.getProperty("os.version")).text(" ")
 				.text(System.getProperty("os.arch")).text(" ").text("jvm:").text(System.getProperty("java.version"))
