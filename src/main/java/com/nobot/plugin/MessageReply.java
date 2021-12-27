@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,7 +86,16 @@ public class MessageReply
 			return;
 //		TODO:添加回复词的分组
 
-		Message message=Message.Companion.toMessageByRainCode(replyString);
+		//		FIXME:将来RainCode支持voice的时候去除这里
+		Message message;
+		if(replyString.toLowerCase(Locale.ROOT).startsWith("<rain:voice:")
+				&&replyString.toLowerCase(Locale.ROOT).endsWith(">"))
+		{
+			message=factory.voice(new File(replyString.substring(12,replyString.length()-1))).toMessage();
+		}
+		else
+			message=Message.Companion.toMessageByRainCode(replyString);
+
 		if(event instanceof GroupMessageEvent)
 			((GroupMessageEvent) event).getGroup().sendMessage(message);
 		else
