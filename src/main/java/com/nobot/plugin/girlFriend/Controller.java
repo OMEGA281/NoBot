@@ -29,6 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -194,17 +195,15 @@ public class Controller
 			File file=service.getGirlImage(girl.getName());
 			map.put(girl.getName(),file);
 		}
-		BufferedImage image= imageGenerationService.makeImage(map);
-		if(image==null)
+		List<File> image= imageGenerationService.makeImage(map);
+		if(image==null||image.isEmpty())
 		{
 			qq.getGroup().sendMessage(message);
 			return;
 		}
-		File tmpFile=new File("tmp"+qq.getGroup().getId()+qq.getId()+".jpg");
-		Thumbnails.of(image).size(3000,3000).outputFormat("jpg").toFile(tmpFile);
-		message.plus(factory.imageByFile(tmpFile));
+		for (File file : image)
+			message.plus(factory.imageByFile(file));
 		qq.getGroup().sendMessage(message);
-		tmpFile.delete();
 	}
 
 	@Action("卖老婆 {name} {num}")
@@ -242,17 +241,15 @@ public class Controller
 			File file=service.getGirlImage(entry.getKey());
 			stringFileMap.put(entry.getKey()+"[售价:"+entry.getValue()+"]",file);
 		}
-		BufferedImage image= imageGenerationService.makeImage(stringFileMap);
-		if(image==null)
+		List<File> image= imageGenerationService.makeImage(stringFileMap);
+		if(image==null||image.isEmpty())
 		{
 			group.sendMessage(messageLineQ);
 			return;
 		}
-		File tmpFile=new File("tmp"+qq.getGroup().getId()+".jpg");
-		Thumbnails.of(image).size(3000,3000).outputFormat("jpg").toFile(tmpFile);
-		messageLineQ.imageByFile(tmpFile);
+		for (File file : image)
+			messageLineQ.imageByFile(file);
 		qq.getGroup().sendMessage(messageLineQ);
-		tmpFile.delete();
 	}
 
 	@Action("买老婆 {name}")
