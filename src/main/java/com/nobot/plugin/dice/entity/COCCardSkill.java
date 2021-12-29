@@ -20,9 +20,8 @@ public class COCCardSkill
 	@JoinColumn(name = "COCCard_id",nullable = false)
 	private COCCard card;
 
-	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "COCCardSkillMap_id",nullable = false)
-	private COCCardSkillName skillName;
+	@Column
+	private String name;
 
 	@Column
 	private Integer point;

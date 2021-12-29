@@ -1,5 +1,6 @@
 package com.nobot.plugin.dice.expressionAnalyzer;
 
+import com.nobot.plugin.dice.entity.COCCard;
 import lombok.NonNull;
 import lombok.var;
 import net.sourceforge.jeval.Evaluator;
@@ -12,57 +13,50 @@ import java.util.Random;
 
 public class ExpressionSorter implements SpecialSymbol
 {
+	/**
+	 * 这是一个分选以及制造计算表达式的方法，会自动抹除表达式前的重复次数
+	 * 检定表达式
+	 * @param evaluator jeval计算器
+	 * @param random 随机数产生器
+	 * @param s 表达式
+	 * @return 未经计算的表达式
+	 */
+	public Expression numCalculation(@NonNull Evaluator evaluator, @NonNull Random random, String s)
+	{
+		var sb=new StringBuilder(s.toUpperCase(Locale.ROOT).replaceAll(" ",""));
+		var index=sb.indexOf("#");
+		sb.delete(0,index+1);
+		return new NumberExpression(evaluator,random,sb.toString());
+	}
 
-	public Expression[] sort(Evaluator evaluator,Random random,String s)
+	public Expression numVerification(@NonNull Random random, String s, @NonNull COCCard card)
 	{
 		var sb=new StringBuilder(s.toUpperCase(Locale.ROOT).replaceAll(" ",""));
 
-		if(sb.charAt(0)==symbol_a)
-		{
-			sb.delete(0,1);
-//			FIXME:这个地方引导进入检定表达式中
-			throw new ExpressionException(s,"尚未支持检定表达式");
-		}
-		else
-		{
-			int time;
-			var index=sb.indexOf("#");
-			if(index==-1)
-				time=1;
-			else
-			{
-				String timeString=sb.substring(0,index);
-				if(timeString==null||timeString.isEmpty())
-					time=1;
-				else
-				{
-					try
-					{
-						time=Integer.parseInt(timeString);
-						if(time>10||time<1)
-							throw new ExpressionException(s,"重复次数越界");
-					}
-					catch (NumberFormatException e)
-					{
-						throw new ExpressionException(s,"重复次数非法");
-					}
-				}
-			}
-			sb.delete(0,index+1);
+	}
 
-//			FIXME:就目前来看这是个脱裤子放屁专门占用内存的设计 将来可能修改一下
-			var expressions=new Expression[time];
-			for (int i=0;i<time;i++)
-			{
-				expressions[i]=new NumberExpression(evaluator,random,sb.toString());
-			}
-			return expressions;
+	/**
+	 * 获得表达式的重复次数
+	 * @param s 表达式
+	 * @return 表达式重复的次数
+	 * @throws ExpressionException 不合法的重复次数
+	 */
+	public int getRepeatTime(String s)
+	{
+		int index=s.indexOf('#');
+		if(index==0)
+			return 1;
+		String s_time=s.substring(index);
+		try
+		{
+			return Integer.parseInt(s_time);
+		}
+		catch (NumberFormatException e)
+		{
+			throw new ExpressionException(s,"重复次数出错！");
 		}
 	}
-	public static Expression test(Evaluator evaluator, Random random, String s)
-	{
-		return new NumberExpression(evaluator,random,s);
-	}
+
 	public static SingleExpression getSingleExpression(@NonNull Random random,@NonNull String s)
 	{
 		var chars=s.toCharArray();

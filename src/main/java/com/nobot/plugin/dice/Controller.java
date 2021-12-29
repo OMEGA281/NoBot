@@ -18,7 +18,6 @@ import net.sourceforge.jeval.Evaluator;
 
 import javax.inject.Inject;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -57,14 +56,6 @@ public class Controller
 		actionContext.set("currentName",currentName);
 	}
 
-	@Action("测试{s}")
-	public String testNew(String s)
-	{
-		var analyzer=ExpressionSorter.test(new Evaluator(),new Random(),s.toUpperCase(Locale.ROOT));
-		analyzer.calculation();
-		return analyzer.getShowExpression()+"="+analyzer.getTrueExpression()+"="+analyzer.getResult();
-	}
-
 	@Action(".r")
 	public String r()
 	{
@@ -75,14 +66,15 @@ public class Controller
 	@Synonym({"。r{d}",".R{d}","。R{d}","。r {d}",".R {d}","。R {d}",".r {d}"})
 	public String r(String d)
 	{
-		var expressions=sorter.sort(evaluator,random,d);
+		var expressions=sorter.numCalculation(evaluator,random,d);
+		int time=sorter.getRepeatTime(d);
 		var sb=new StringBuilder();
-		for (Expression expression : expressions)
+		for (int i=0;i<time;i++)
 		{
-			expression.calculation();
-			sb.append(expression.getResourceExpression()).append('=')
-					.append(expression.getShowExpression()).append('=')
-					.append(expression.getResult()).append("\r\n");
+			expressions.calculation();
+			sb.append(expressions.getResourceExpression()).append('=')
+					.append(expressions.getShowExpression()).append('=')
+					.append(expressions.getResult()).append("\n");
 		}
 		sb.delete(sb.length()-1,sb.length());
 		return sb.toString();
@@ -151,4 +143,6 @@ public class Controller
 		evaluator=new Evaluator();
 		random=new Random();
 	}
+
+	private
 }

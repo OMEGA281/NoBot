@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * 这是一个投掷表达式
+ */
 public class NumberExpression implements Expression
 {
 	private Evaluator evaluator;

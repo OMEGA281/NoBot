@@ -9,6 +9,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
 
+/**
+ * 这是最小的随机数表达式单位
+ */
 public class RandomExpression implements SpecialSymbol, SingleExpression
 {
 	private Random random;

@@ -8,9 +8,9 @@ import java.util.List;
 
 
 @Dao
-public interface COCCardDAO extends YuDao<COCCard,String>
+public interface COCCardDAO extends YuDao<COCCard,Long>
 {
-	public List<COCCard> findByUserAndGroup(long user, long group);
-	public List<COCCard> findByUser(long user);
-	public List<COCCard> findByGroup(long group);
+	COCCard findById(long id);
+	List<COCCard> findByUser(long user);
+	List<COCCard> findByGroup(long group);
 }
