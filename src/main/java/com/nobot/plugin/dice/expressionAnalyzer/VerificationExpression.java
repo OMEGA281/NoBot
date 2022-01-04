@@ -2,6 +2,7 @@ package com.nobot.plugin.dice.expressionAnalyzer;
 
 import com.nobot.plugin.dice.service.DefaultSkill;
 import com.nobot.plugin.dice.service.SkillNameTranslator;
+import lombok.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,13 +13,18 @@ public class VerificationExpression implements Expression,SpecialSymbol
 	private int bonusOrPunishDiceNum;
 	private int[] extraDice;
 	private String skillName;
+	/**0：正常；1：困难；2：极难*/
+	private int difficult=0;
 	private int skillNum=-1;
 	private Random random;
+	private long groupNum;
 
 	private int originalValue;
 	private int resultValue;
+	/**0：失败；1：成功；2：困难成功；3：极难成功*/
+	private int successLevel;
 
-	VerificationExpression(String expression, Random random, Map<String,Integer> skillMap)
+	VerificationExpression(String expression, @NonNull Random random, Map<String,Integer> skillMap,long groupNum)
 	{
 		int bonusDiceNum=0,punishDiceNum=0,skillNum=0;
 		StringBuilder skillName = new StringBuilder();
@@ -92,7 +98,22 @@ public class VerificationExpression implements Expression,SpecialSymbol
 		extraDice=new int[Math.abs(bonusDiceNum)];
 		if(skillName.length()==0)
 			throw new ExpressionException(expression,"未检测到技能名称");
-		this.skillName=skillName.toString();
+		if(skillName.length()<2)
+			this.skillName=skillName.toString();
+		else
+		{
+			if (skillName.charAt(0)=='困'&&skillName.charAt(1)=='难')
+			{
+				this.skillName = skillName.delete(0, 2).toString();
+				difficult=1;
+			}
+			else if (skillName.charAt(0)=='极'&&skillName.charAt(1)=='难')
+			{
+				this.skillName = skillName.delete(0, 2).toString();
+				difficult=2;
+			}
+			else this.skillName=skillName.toString();
+		}
 		if(skillNum!=0)
 			this.skillNum=skillNum;
 		else
@@ -139,6 +160,33 @@ public class VerificationExpression implements Expression,SpecialSymbol
 				tens=i;
 			resultValue=tens*10+ones;
 		}
+		else resultValue=originalValue;
+
+		int normalSuccess=skillNum;
+		int hardSuccess=normalSuccess/2;
+		int extremeSuccess=normalSuccess/5;
+
+		if(resultValue<=extremeSuccess)
+			successLevel=difficult==2?1:3;
+		else if(resultValue<=hardSuccess)
+		{
+			switch (difficult)
+			{
+				case 0:
+					successLevel=2;
+					break;
+				case 1:
+					successLevel=1;
+					break;
+				case 2:
+					successLevel=0;
+					break;
+			}
+		}
+		else if (resultValue<=normalSuccess)
+			successLevel=difficult==0?1:0;
+
+
 	}
 
 	@Override
