@@ -23,7 +23,7 @@ import java.util.Date;
 public class TodayLuck
 {
 	private final SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMdd");
-	@Before()
+	@Before
 	public void getName(BotActionContext actionContext, Contact qq)
 	{
 		if(actionContext.getSource() instanceof Member)
