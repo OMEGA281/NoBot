@@ -28,6 +28,8 @@ import lombok.NonNull;
 import lombok.var;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
@@ -37,11 +39,11 @@ import java.util.*;
 @GroupController
 @PrivateController
 @EventListener
-@CreateDir({"Image", "Image/setting"})
-@CreateFile({"Image/setting/ImageTag.txt", "Image/setting/Record.txt"})
+@CreateDir({"Image"})
 public class ShowImage
 {
 	private Random random;
+	private static Logger logger=LoggerFactory.getLogger(ShowImage.class);
 
 	@Inject
 	private MessageItemFactory factory;
@@ -49,7 +51,7 @@ public class ShowImage
 	private Service service;
 
 	@Event
-	public void initList(AppStartEvent event) throws IOException
+	public void initList(AppStartEvent event)
 	{
 		random=new Random();
 	}
@@ -63,13 +65,7 @@ public class ShowImage
 			int id=messageSource.getId();
 			String imageName=service.findFileNameByMessageID(id);
 			if(imageName==null)
-			{
-				if(event instanceof GroupMessageEvent)
-					((GroupMessageEvent) event).getGroup().sendMessage("添加失败");
-				else
-					event.getSender().sendMessage("添加失败");
 				return;
-			}
 			Message message=event.getMessage();
 
 			String string=message.getCodeStr();
@@ -118,14 +114,14 @@ public class ShowImage
 		else
 		{
 			File file=imageList.get(random.nextInt(imageList.size()));
-			File tmpFile=new File("tmp"+file.getName());
-			Thumbnails.of(file).size(1500,1500).toFile(tmpFile);
-			Message message=new Message().plus(factory.imageByFile(tmpFile));
+			Message message=new Message().plus(factory.imageByFile(file));
 			MessageSource messageSource=requester.sendMessage(message);
-			tmpFile.delete();
 			int id=messageSource.getId();
 			if (id!=0)
-				service.putMessageIDAndFileName(id,file.getName());
+			{
+				logger.debug("id:"+id+"\tfilename:"+file.getName());
+				service.putMessageIDAndFileName(id, file.getName());
+			}
 			return null;
 		}
 	}
