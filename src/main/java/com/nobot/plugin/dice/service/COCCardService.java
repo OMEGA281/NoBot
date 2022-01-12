@@ -2,12 +2,15 @@ package com.nobot.plugin.dice.service;
 
 import com.icecreamqaq.yudb.jpa.annotation.Transactional;
 import com.nobot.plugin.dice.dao.COCCardDAO;
+import com.nobot.plugin.dice.dao.COCCardSkillDAO;
+import com.nobot.plugin.dice.dao.COCGroupDAO;
 import com.nobot.plugin.dice.entity.COCCard;
 import com.nobot.plugin.dice.entity.COCCardSkill;
-import com.nobot.plugin.dice.entity.COCCardSkillName;
+import com.nobot.plugin.dice.entity.COCGroup;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,79 +18,84 @@ public class COCCardService
 {
 	@Inject
 	private COCCardDAO cardDAO;
+
 	@Inject
-	private COCCardSkillNameService skillNameService;
+	private COCGroupDAO groupDAO;
+
+	@Inject
+	private COCCardSkillDAO skillDAO;
 
 	/**
 	 * 通过用户和群取卡
-	 *
-	 * @param user      用户QQ
-	 * @param group 	群号，若值为0则从未分配卡中取出修改时间最近的卡
-	 * @return 卡，没有对应记录会返回私聊的返回null
+	 * @param userNum      用户QQ
+	 * @param groupNum 	群号
+	 * @return coc卡
 	 */
 	@Transactional
-	public COCCard getCard(long user, long group)
+	public COCCard getCard(long userNum, long groupNum)
 	{
-		List<COCCard> list= cardDAO.findByUserAndGroup(user,group);
-		if(list==null||list.isEmpty())
+		List<COCCard> cardList= cardDAO.findByUser(userNum);
+		COCGroup group=groupDAO.findById(groupNum);
+		if(cardList==null||cardList.isEmpty()||group==null)
 			return null;
-		if(group==0)
+		for (COCCard card : cardList)
 		{
-			COCCard r=list.get(0);
-			for(int i=1;i<list.size();i++)
+			List<COCGroup> cardGroupList=card.getGroupList();
+			for (COCGroup cocGroup : cardGroupList)
 			{
-				COCCard x=list.get(i);
-				if(x.getUpdateTime().compareTo(r.getUpdateTime())>0)
-					r=x;
+				if(cocGroup.getId()==groupNum)
+					return card;
 			}
-			return r;
 		}
-		if(list.size()>1)
-			new Exception("在同一个群内一个用户出现了两张卡 请处理\r\nCOCCard\r\nUSER:"+user+"GROUP:"+group)
-					.printStackTrace();
-		return list.get(0);
+		return null;
+	}
+
+	public Map<String, Integer> getSkillMap(long userNum, long groupNum)
+	{
+		HashMap<String,Integer> map=new HashMap<>();
+		COCCard card=getCard(userNum,groupNum);
+		if(card==null)
+			return map;
+		List<COCCardSkill> skillList=card.getSkillList();
+		for (COCCardSkill skill : skillList)
+			map.put(skill.getName(),skill.getPoint());
+		return map;
+	}
+
+	public int getSkill(long userNum,long groupNum,String skillName)
+	{
+		Map<String,Integer> map=getSkillMap(userNum,groupNum);
+		Integer integer=map.get(skillName);
+		return integer==null?-1:integer;
 	}
 
 	/**
-	 * 根据用户qq号获得所有名下角色卡
-	 *
-	 * @param num 用户qq号
-	 * @return 所有名下角色卡
+	 * 设置一张卡的技能值
+	 * @param cardID 卡ID
+	 * @param skillName 技能名称
+	 * @param skillPoint 技能数值
+	 * @return 曾经的技能数值，若曾经不存在技能则返回-1
 	 */
 	@Transactional
-	public List<COCCard> getCard(long num)
+	public int setSkill(long cardID,String skillName,int skillPoint)
 	{
-		return cardDAO.findByUser(num);
-	}
-
-	/**
-	 * 保存或更新角色卡
-	 *
-	 * @param card 角色卡
-	 */
-	@Transactional
-	public void saveOrUpdateCard(COCCard card)
-	{
-		cardDAO.saveOrUpdate(card);
-	}
-
-	@Transactional
-	public COCCardSkillName transSkillName(String skillName)
-	{
-		return skillNameService.getOrCreatSkillName(skillName);
-	}
-
-	@Transactional
-	public List<COCCardSkill> transSkill(Map<String,Integer> map)
-	{
-		List<COCCardSkill> list=new ArrayList<>();
-		for (Map.Entry<String,Integer> entry:map.entrySet())
+		COCCard card=cardDAO.findById(cardID);
+		List<COCCardSkill> skillList=card.getSkillList();
+		for (COCCardSkill skill : skillList)
 		{
-			COCCardSkill skill=new COCCardSkill();
-			skill.setSkillName(transSkillName(entry.getKey()));
-			skill.setPoint(entry.getValue());
-			list.add(skill);
+			if(skill.getName().equals(skillName))
+			{
+				int pastSkill=skill.getPoint();
+				skill.setPoint(skillPoint);
+				cardDAO.update(card);
+				return pastSkill;
+			}
 		}
-		return list;
+		COCCardSkill skill=new COCCardSkill();
+		skill.setCard(card);
+		skill.setName(skillName);
+		skill.setPoint(skillPoint);
+		skillDAO.save(skill);
+		return -1;
 	}
 }
