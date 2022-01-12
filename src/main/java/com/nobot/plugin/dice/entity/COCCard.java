@@ -49,7 +49,7 @@ public class COCCard
 	/**
 	 * 属于的群
 	 */
-	@ManyToMany(cascade = CascadeType.ALL,mappedBy = "cardList")
+	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "GROUP_TO_CARD",joinColumns = {@JoinColumn(name="COCGROUP_ID")},
 			inverseJoinColumns = {@JoinColumn(name = "COCCARD_ID")})
 	private List<COCGroup> groupList;

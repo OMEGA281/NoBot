@@ -26,7 +26,7 @@ public class NumberExpression implements Expression
 	private int result;
 	private	List<Object> list=new ArrayList<>();
 
-	protected NumberExpression(Evaluator evaluator, Random random, String expression)
+	public NumberExpression(Evaluator evaluator, Random random, String expression)
 	{
 		this.evaluator=evaluator;
 		this.random=random;

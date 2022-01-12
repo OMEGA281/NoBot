@@ -7,6 +7,8 @@ public interface Expression
 	int getResult();
 	/**给用户看的表达式*/
 	String getShowExpression();
+	/**用于计算的表达式*/
 	String getTrueExpression();
+	/**汇入时候的表达式*/
 	String getResourceExpression();
 }

@@ -95,10 +95,10 @@ public class VerificationSpecialTask
 	}
 
 	@Inject
-	private COCGroupSettingServer server;
-	private int defaultSuccessSetting,defaultFailSetting;
+	private static COCGroupSettingServer server;
+	private static int defaultSuccessSetting,defaultFailSetting;
 
-	public boolean isExSuccess(long groupNum,int skillNum,int randomNum,int successStatue)
+	public static boolean isExSuccess(long groupNum,int skillNum,int randomNum,int successStatue)
 	{
 		int index=server.getSuccessSetting(groupNum);
 		if(index<0)
@@ -106,12 +106,12 @@ public class VerificationSpecialTask
 		return SuccessTask.getTask(index).getTask().isPass(skillNum,randomNum,successStatue);
 	}
 
-	public boolean isExFail(long groupNum,int skillNum,int randomNum,int successStatue)
+	public static boolean isExFail(long groupNum,int skillNum,int randomNum,int successStatue)
 	{
 		int index=server.getFailSetting(groupNum);
 		if(index<0)
 			index=defaultFailSetting;
-		return SuccessTask.getTask(index).getTask().isPass(skillNum,randomNum,successStatue);
+		return FailTask.getTask(index).getTask().isPass(skillNum,randomNum,successStatue);
 	}
 
 	@Event

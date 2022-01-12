@@ -1,7 +1,6 @@
 package com.nobot.plugin.dice;
 
 import com.IceCreamQAQ.Yu.annotation.*;
-import com.IceCreamQAQ.Yu.event.events.AppStartEvent;
 import com.icecreamqaq.yuq.annotation.GroupController;
 import com.icecreamqaq.yuq.annotation.PrivateController;
 import com.icecreamqaq.yuq.controller.BotActionContext;
@@ -9,34 +8,26 @@ import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Friend;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
-import com.icecreamqaq.yuq.message.Message;
-import com.nobot.plugin.dice.entity.COCCard;
-import com.nobot.plugin.dice.expressionAnalyzer.Expression;
-import com.nobot.plugin.dice.expressionAnalyzer.ExpressionSorter;
-import lombok.var;
+import com.nobot.plugin.dice.expressionAnalyzer.*;
+import com.nobot.plugin.dice.service.COCCardService;
+import com.nobot.plugin.dice.service.StringFormatHelper;
 import net.sourceforge.jeval.Evaluator;
 
 import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 @GroupController
 @PrivateController
 @EventListener
-public class Controller
+public class Controller implements SpecialSymbol
 {
 	@Inject
-	private DataService dataService;
+	private COCCardService service;
 	@Inject
-	private Dice dice;
-	@Inject
-	private Verification verification;
-	@Inject
-	private ExpressionSorter sorter;
+	private StringFormatHelper stringFormatHelper;
 
-	private Evaluator evaluator;
-	private Random random;
+	private Evaluator evaluator=new Evaluator();
+	private Random random=new Random();
 
 	@Before
 	private void getMessageType(BotActionContext actionContext, Member qq, Friend sender)
@@ -57,92 +48,78 @@ public class Controller
 	}
 
 	@Action(".r")
-	public String r()
+	public String r(Group group,Contact qq,String currentName)
 	{
-		return r("d");
+		return r("d",group,qq,currentName);
 	}
 
 	@Action(".r{d}")
 	@Synonym({"。r{d}",".R{d}","。R{d}","。r {d}",".R {d}","。R {d}",".r {d}"})
-	public String r(String d)
+	public String r(String d,Group group,Contact qq,String currentName)
 	{
-		var expressions=sorter.numCalculation(evaluator,random,d);
-		int time=sorter.getRepeatTime(d);
-		var sb=new StringBuilder();
+		StringBuilder builder=new StringBuilder(d.toUpperCase());
+		boolean isH;
+		if(builder.charAt(0)==symbol_h)
+		{
+			isH=true;
+			builder.deleteCharAt(0);
+		}
+		else isH=false;
+		int time=getRepeat(builder);
+		deleteRepeat(builder);
+		Expression expression;
+
+		if(builder.charAt(0)==symbol_a)
+		{
+			builder.deleteCharAt(0);
+			expression=new VerificationExpression(
+					builder.toString(),random,service.getSkillMap(qq.getId(),group.getId()),group.getId());
+		}
+		else
+			expression=new NumberExpression(evaluator,random,builder.toString());
+
+		StringBuilder test=new StringBuilder();
 		for (int i=0;i<time;i++)
 		{
-			expressions.calculation();
-			sb.append(expressions.getResourceExpression()).append('=')
-					.append(expressions.getShowExpression()).append('=')
-					.append(expressions.getResult()).append("\n");
+			expression.calculation();
+			test.append(stringFormatHelper.getFormat(expression, qq.getName())).append('\n');
 		}
-		sb.delete(sb.length()-1,sb.length());
-		return sb.toString();
-	}
 
-	@Action(".rh{d}")
-	@Synonym({"。rh{d}",".RH{d}","。RH{d}","。rh {d}",".RH {d}","。RH {d}",".rh {d}"})
-	public String rh(Contact qq,boolean isGroup,String d,String currentName)
-	{
-		if(!isGroup)
+		if(isH)
 		{
-			qq.sendMessage(new Message().plus("私聊没有必要暗骰"));
-			return null;
+			qq.sendMessage(test.toString());
+			return qq.getName()+"进行了一次暗骰";
 		}
-		String s=r(d);
-		qq.sendMessage(new Message().plus(s));
-		return currentName+"进行了一次私骰";
+		else
+			return test.toString();
 	}
 
-	@Action(".ra {skill}")
-	public String ra(long qq,long group,boolean isGroup,String skill,String currentName)
-			throws NoSuitableCardException
+	private StringBuilder deleteRepeat(StringBuilder builder)
 	{
-		COCCard card=dataService.getCard(qq,isGroup?group:0L);
-		int i=card.getSkill(skill);
-		return verification.getString(verification.judge(verification.getVerificationState(i)),currentName,skill);
+		int index=builder.indexOf("#");
+		if(index>=0)
+			builder.delete(0,index+1);
+		return builder;
 	}
 
-	@Action(".ra {skill} {skillNum}")
-	public String ra(String skill,int skillNum,String currentName)
-			throws NoSuitableCardException
+	private int getRepeat(StringBuilder builder)
 	{
-		return verification.getString(
-				verification.judge(verification.getVerificationState(skillNum)),currentName,skill);
+		int index=builder.indexOf("#");
+		if(index>0)
+		{
+			return Integer.parseInt(builder.substring(0,index));
+		}
+		else return 1;
 	}
 
-	@Action(".rap {diceNum} {skill}")
-	public String rap(long qq,long group,boolean isGroup,String skill,String currentName)
-			throws NoSuitableCardException
+	@Catch(error = NumberFormatException.class)
+	public String wrongNum()
 	{
-		COCCard card=dataService.getCard(qq,isGroup?group:0L);
-		int i=card.getSkill(skill);
-		return verification.getString(verification.judge(verification.getVerificationState(i)),currentName,skill);
+		return "不识别的数字";
 	}
-
-
 	@Catch(error = NoSuitableCardException.class)
 	public String noCard()
 	{
 		return "未找到人物卡";
 	}
-
-	private Map.Entry<String,Integer> getSkillAndLevel(String skill)
-	{
-		if(skill.startsWith("极难"))
-		{
-			Map map=new HashMap();
-			map.put("a",1);
-		}
-		return null;
-	}
-
-	@Event
-	public void init(AppStartEvent event)
-	{
-		evaluator=new Evaluator();
-		random=new Random();
-	}
-
-	private
 }

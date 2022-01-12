@@ -44,11 +44,11 @@ public class DefaultSkill
 	/**
 	 * 获得默认技能数值
 	 * @param name 技能名称，本方法会自动更正成正确关键词
-	 * @return 技能数值，不存在则返回0
+	 * @return 技能数值，不存在则返回-1
 	 */
 	public static int getDefaultSkill(String name)
 	{
 		String key=SkillNameTranslator.getMainSkillWord(name);
-		return map.getOrDefault(key, 0);
+		return map.getOrDefault(key, -1);
 	}
 }

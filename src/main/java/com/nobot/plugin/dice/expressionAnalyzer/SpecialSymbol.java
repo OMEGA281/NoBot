@@ -18,6 +18,7 @@ public interface SpecialSymbol
 
 	char symbol_r='R';
 	char symbol_a='A';
+	char symbol_h='H';
 
 	int PUNISH_MODE=-1;
 	int BONUS_MODE=1;

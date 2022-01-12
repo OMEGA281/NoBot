@@ -50,23 +50,13 @@ public class COCCardService
 		return null;
 	}
 
-	/**
-	 * 根据用户qq号获得所有名下角色卡
-	 *
-	 * @param num 用户qq号
-	 * @return 所有名下角色卡
-	 */
-	@Transactional
-	public List<COCCard> getCard(long num)
-	{
-		return cardDAO.findByUser(num);
-	}
-
 	public Map<String, Integer> getSkillMap(long userNum, long groupNum)
 	{
-		COCCard card=getCard(userNum,groupNum);
-		List<COCCardSkill> skillList=card.getSkillList();
 		HashMap<String,Integer> map=new HashMap<>();
+		COCCard card=getCard(userNum,groupNum);
+		if(card==null)
+			return map;
+		List<COCCardSkill> skillList=card.getSkillList();
 		for (COCCardSkill skill : skillList)
 			map.put(skill.getName(),skill.getPoint());
 		return map;
