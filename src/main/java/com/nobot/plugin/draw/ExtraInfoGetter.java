@@ -3,12 +3,13 @@ package com.nobot.plugin.draw;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
-import com.nobot.plugin.dice.Dice;
+import com.nobot.plugin.dice.expressionAnalyzer.RandomExpression;
 import com.nobot.system.BotInfo;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.regex.Matcher;
 
 public class ExtraInfoGetter implements ConstantPool
@@ -16,9 +17,9 @@ public class ExtraInfoGetter implements ConstantPool
 	@Inject
 	MessageItemFactory factory;
 	@Inject
-	Dice dice;
-	@Inject
 	BotInfo botInfo;
+
+	private Random random=new Random();
 
 	private ArrayList<String> complexMessageDecompose(String s)
 	{
@@ -53,8 +54,8 @@ public class ExtraInfoGetter implements ConstantPool
 			case specialWord_image:
 				return factory.imageByFile(new File(drawPool+"\\"+text));
 			case specialWord_r:
-				String expression=dice.getTrueExpression(text);
-				int result=dice.getResult(expression);
+				RandomExpression expression= new RandomExpression(random,text);
+				int result=expression.getResult();
 				return factory.text(Integer.toString(result));
 			case specialWord_name:
 				switch (text)

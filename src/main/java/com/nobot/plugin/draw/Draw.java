@@ -1,17 +1,15 @@
 package com.nobot.plugin.draw;
 
 
-import com.nobot.plugin.dice.Dice;
+import com.nobot.plugin.dice.expressionAnalyzer.RandomExpression;
 import lombok.NonNull;
 
-import javax.inject.Inject;
 import java.util.*;
 import java.util.regex.Matcher;
 
 public class Draw implements ConstantPool
 {
-	@Inject
-	Dice dice;
+	private Random random=new Random();
 
 	private final int indexSize = 0;
 	private final Map<Integer, Integer> index = new HashMap<>();
@@ -58,7 +56,9 @@ public class Draw implements ConstantPool
 				{
 					try
 					{
-						repeatNum=dice.getResult(dice.getTrueExpression(repeat.group(1)));
+						RandomExpression expression=new RandomExpression(random,repeat.group(1));
+						expression.calculation();
+						repeatNum=expression.getResult();
 					}
 					catch (Exception e)
 					{

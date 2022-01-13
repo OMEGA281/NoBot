@@ -117,9 +117,4 @@ public class Controller implements SpecialSymbol
 	{
 		return "不识别的数字";
 	}
-	@Catch(error = NoSuitableCardException.class)
-	public String noCard()
-	{
-		return "未找到人物卡";
-	}
 }

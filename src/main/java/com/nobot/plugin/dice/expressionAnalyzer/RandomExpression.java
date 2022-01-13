@@ -32,7 +32,7 @@ public class RandomExpression implements SpecialSymbol, SingleExpression
 	private ArrayList<Object> list;
 
 	//FIXME:将来将这里和下一个方法结合在一起，现在混淆了用法
-	protected RandomExpression(Random random,String resource)
+	public RandomExpression(Random random, String resource)
 	{
 		this.random=random;
 		this.resource=resource;
