@@ -48,21 +48,24 @@ public class Controller implements SpecialSymbol
 	}
 
 	@Action(".r")
-	public String r(Group group,Contact qq,String currentName)
+	public String r(Group group,Contact qq,String currentName) throws ExpressionException
 	{
 		return r("d",group,qq,currentName);
 	}
 
 	@Action(".r{d}")
 	@Synonym({"。r{d}",".R{d}","。R{d}","。r {d}",".R {d}","。R {d}",".r {d}"})
-	public String r(String d,Group group,Contact qq,String currentName)
+	public String r(String d,Group group,Contact qq,String currentName) throws ExpressionException
 	{
 		StringBuilder builder=new StringBuilder(d.toUpperCase());
 		boolean isH;
 		if(builder.charAt(0)==symbol_h)
 		{
 			isH=true;
-			builder.deleteCharAt(0);
+			if(builder.length()!=1)
+				builder.deleteCharAt(0);
+			else
+				builder=new StringBuilder().append(symbol_d);
 		}
 		else isH=false;
 		int time=getRepeat(builder);
@@ -71,7 +74,9 @@ public class Controller implements SpecialSymbol
 
 		if(builder.charAt(0)==symbol_a)
 		{
-			builder.deleteCharAt(0);
+			if(builder.length()!=1)
+				builder.deleteCharAt(0);
+			else throw new ExpressionException(d,"判定表达式为空");
 			expression=new VerificationExpression(
 					builder.toString(),random,service.getSkillMap(qq.getId(),group.getId()),group.getId());
 		}
@@ -116,5 +121,10 @@ public class Controller implements SpecialSymbol
 	public String wrongNum()
 	{
 		return "不识别的数字";
+	}
+	@Catch(error = ExpressionException.class)
+	public void wrongExpression(ExpressionException exception)
+	{
+		System.out.println("?!");
 	}
 }

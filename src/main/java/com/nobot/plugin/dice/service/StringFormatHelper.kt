@@ -15,8 +15,8 @@ class StringFormatHelper
 		var text: StringBuilder = StringBuilder()
 		when (expression)
 		{
-			is RandomExpression -> "${expression.resourceExpression}=${expression.result}"
-			is NumberExpression -> "${name}进行了一次投掷，${expression.resourceExpression}=${expression.showExpression}=${expression.resourceExpression}"
+			is RandomExpression -> text.append("${expression.resourceExpression}=${expression.result}")
+			is NumberExpression -> text.append("${name}进行了一次投掷，${expression.resourceExpression}=${expression.showExpression}=${expression.result}")
 			is VerificationExpression ->
 			{
 				text.append("${name}对${expression.skillName}进行检定，rd100=${expression.trueExpression}")

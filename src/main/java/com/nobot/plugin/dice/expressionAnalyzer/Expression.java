@@ -3,7 +3,7 @@ package com.nobot.plugin.dice.expressionAnalyzer;
 public interface Expression
 {
 	/**按照解析的表达式进行一次计算*/
-	void calculation();
+	void calculation() throws ExpressionException;
 	int getResult();
 	/**给用户看的表达式*/
 	String getShowExpression();

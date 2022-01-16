@@ -11,6 +11,7 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageLineQ;
+import com.nobot.plugin.dice.expressionAnalyzer.ExpressionException;
 import com.nobot.system.BotInfo;
 import com.nobot.system.annotation.CreateDir;
 import com.nobot.tool.XmlReader;
@@ -104,7 +105,7 @@ public class Controller
 
 	@Action(value = "{t_num}次抽{cardName}")
 	public Message drawCard(String cardName, String t_num, boolean isGroup, String userName, String myName,
-							Group group, long qq)
+							Group group, long qq) throws ExpressionException
 	{
 		int num = Integer.parseInt(t_num);
 		Card card = map.get(cardName);
@@ -116,7 +117,7 @@ public class Controller
 	}
 
 	@Action(value = "抽{cardName}")
-	public Message drawCard(String cardName, boolean isGroup, String userName, String myName, Group group, long qq)
+	public Message drawCard(String cardName, boolean isGroup, String userName, String myName, Group group, long qq) throws ExpressionException
 	{
 		return drawCard(cardName, "1", isGroup, userName, myName, group, qq);
 	}

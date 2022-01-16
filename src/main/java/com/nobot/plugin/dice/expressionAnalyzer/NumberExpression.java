@@ -26,7 +26,7 @@ public class NumberExpression implements Expression
 	private int result;
 	private	List<Object> list=new ArrayList<>();
 
-	public NumberExpression(Evaluator evaluator, Random random, String expression)
+	public NumberExpression(Evaluator evaluator, Random random, String expression) throws ExpressionException
 	{
 		this.evaluator=evaluator;
 		this.random=random;
@@ -43,7 +43,7 @@ public class NumberExpression implements Expression
 				case '=':
 					if(builder.length()!=0)
 					{
-						var part=ExpressionSorter.getSingleExpression(random,builder.toString());
+						var part=new RandomExpression(random,builder.toString());
 						list.add(part);
 						builder=new StringBuilder();
 					}
@@ -56,21 +56,22 @@ public class NumberExpression implements Expression
 		}
 		if(builder.length()!=0)
 		{
-			var part=ExpressionSorter.getSingleExpression(random,builder.toString());
+			RandomExpression part= null;
+			part = new RandomExpression(random,builder.toString());
 			list.add(part);
 		}
 	}
 
 	@Override
-	public void calculation()
+	public void calculation() throws ExpressionException
 	{
 		var trueBuilder=new StringBuilder();
 		var showBuilder=new StringBuilder();
 		for (Object o : list)
 		{
-			if (o instanceof SingleExpression)
+			if (o instanceof RandomExpression)
 			{
-				var part=(SingleExpression)o;
+				var part=(RandomExpression)o;
 				part.calculation();
 				trueBuilder.append(part.getTrueExpression());
 				showBuilder.append(part.getShowExpression());

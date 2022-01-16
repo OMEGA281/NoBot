@@ -3,6 +3,7 @@ package com.nobot.plugin.draw;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItem;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
+import com.nobot.plugin.dice.expressionAnalyzer.ExpressionException;
 import com.nobot.plugin.dice.expressionAnalyzer.RandomExpression;
 import com.nobot.system.BotInfo;
 
@@ -41,7 +42,7 @@ public class ExtraInfoGetter implements ConstantPool
 		}
 		return stringList;
 	}
-	private MessageItem replaceString(String s,long groupNum,long senderNum)
+	private MessageItem replaceString(String s,long groupNum,long senderNum) throws ExpressionException
 	{
 		if(!(s.startsWith("$")&&s.endsWith("#")))
 			return factory.text(s);
@@ -98,7 +99,7 @@ public class ExtraInfoGetter implements ConstantPool
 		}
 	}
 
-	protected Message transToMessage(String s,long groupNum,long senderNum)
+	protected Message transToMessage(String s,long groupNum,long senderNum) throws ExpressionException
 	{
 		ArrayList<String> list=complexMessageDecompose(s);
 		ArrayList<MessageItem> messageItems=new ArrayList<>();
