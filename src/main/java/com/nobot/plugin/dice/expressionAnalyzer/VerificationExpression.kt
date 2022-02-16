@@ -177,7 +177,7 @@ class VerificationExpression(
 		if (skillName == null) skillName = "匿名技能"
 
 		bonusOrPunishDiceNum = bonusDiceNum - punishDiceNum
-		extraDice = IntArray(abs(bonusDiceNum))
+		extraDice = IntArray(abs(bonusOrPunishDiceNum))
 		when
 		{
 			skillName.startsWith("困难") ->
