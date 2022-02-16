@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 
 public class Draw implements ConstantPool
 {
-	private Random random=new Random();
+	private final Random random=new Random();
 
 	private final int indexSize = 0;
 	private final Map<Integer, Integer> index = new HashMap<>();

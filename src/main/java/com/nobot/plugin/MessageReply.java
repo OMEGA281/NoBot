@@ -123,6 +123,7 @@ public class MessageReply
 		}
 		return map.size();
 	}
+
 	@Catch(error = JDOMException.class)
 	public void readException1()
 	{
