@@ -10,6 +10,7 @@ import com.nobot.system.BotInfo;
 import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Random;
 import java.util.regex.Matcher;
 
@@ -47,12 +48,21 @@ public class ExtraInfoGetter implements ConstantPool
 		if(!(s.startsWith("$")&&s.endsWith("#")))
 			return factory.text(s);
 		String command=s.substring(2,s.length()-2);
-		String[] ps=command.split(":|：");
+		String[] ps=command.split(":|：",2);
 		String type=ps[0];
 		String text=ps[1];
 		switch (type)
 		{
 			case specialWord_image:
+				String[] pathAndType=text.split(",");
+				if(pathAndType.length>1)
+					switch (pathAndType[1].toLowerCase(Locale.ROOT))
+					{
+						case "url":
+							return factory.imageByUrl(pathAndType[0]);
+						case "file":
+							return factory.imageByFile(new File(drawPool+"\\"+text));
+					}
 				return factory.imageByFile(new File(drawPool+"\\"+text));
 			case specialWord_r:
 				RandomExpression expression= new RandomExpression(random,text);

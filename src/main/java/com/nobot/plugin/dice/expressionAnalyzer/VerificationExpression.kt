@@ -2,7 +2,6 @@ package com.nobot.plugin.dice.expressionAnalyzer
 
 import com.nobot.plugin.dice.expressionAnalyzer.SpecialSymbol.symbol_b
 import com.nobot.plugin.dice.expressionAnalyzer.SpecialSymbol.symbol_p
-import com.nobot.plugin.dice.service.DefaultSkill
 import com.nobot.plugin.dice.service.SkillNameTranslator
 import java.util.*
 import kotlin.math.abs
@@ -116,7 +115,7 @@ class VerificationExpression(
 			{
 				symbol_b ->
 				{
-					var builder = StringBuilder()
+					val builder = StringBuilder()
 					index += 1
 					while (index < chars.size)
 					{
@@ -131,7 +130,7 @@ class VerificationExpression(
 				}
 				symbol_p ->
 				{
-					var builder = StringBuilder()
+					val builder = StringBuilder()
 					index += 1
 					while (index < chars.size)
 					{
@@ -146,7 +145,7 @@ class VerificationExpression(
 				}
 				in '0'..'9' ->
 				{
-					var builder = StringBuilder()
+					val builder = StringBuilder()
 					while (index < chars.size)
 					{
 						if (chars[index] in '0'..'9')
@@ -160,7 +159,7 @@ class VerificationExpression(
 				}
 				else ->
 				{
-					var builder = StringBuilder()
+					val builder = StringBuilder()
 					while (index < chars.size)
 					{
 						if (chars[index] !in '0'..'9')
