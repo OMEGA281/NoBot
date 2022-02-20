@@ -22,5 +22,12 @@
             timeToIdleSeconds="1800"
     />
 
+    <cache
+        name="StringCache"
+        eternal="false"
+        timeToIdleSeconds="600"
+        maxElementsInMemory="30"
+    />
+
 
 </ehcache>

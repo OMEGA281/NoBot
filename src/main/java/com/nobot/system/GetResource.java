@@ -52,7 +52,18 @@ public class GetResource
 		File file = getOutsideResource(outSideFile);
 		if(file!=null&&!cover)
 			return false;
+
 		file=new File(outSideFile);
+		String fileAbsolutePath=file.getAbsolutePath();
+		if(fileAbsolutePath.contains(File.separator))
+		{
+			int index=fileAbsolutePath.lastIndexOf(File.separator);
+			if(index>0)
+			{
+				String dirs=fileAbsolutePath.substring(0,index);
+				new File(dirs).mkdirs();
+			}
+		}
 		try
 		{
 			file.createNewFile();

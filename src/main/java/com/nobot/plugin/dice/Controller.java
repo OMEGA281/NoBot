@@ -11,6 +11,8 @@ import com.icecreamqaq.yuq.entity.Member;
 import com.nobot.plugin.dice.expressionAnalyzer.*;
 import com.nobot.plugin.dice.service.COCCardService;
 import com.nobot.plugin.dice.service.StringFormatHelper;
+import com.nobot.system.annotation.UnzipFile;
+import com.nobot.system.stringHelper.DefaultStringFile;
 import net.sourceforge.jeval.Evaluator;
 
 import javax.inject.Inject;
@@ -19,6 +21,8 @@ import java.util.Random;
 @GroupController
 @PrivateController
 @EventListener
+@UnzipFile(name="DiceString.properties",aim = "./String/DiceString.properties")
+@DefaultStringFile(value = "./String/DiceString.properties",info = "这是检定和掷骰的类")
 public class Controller implements SpecialSymbol
 {
 	@Inject
