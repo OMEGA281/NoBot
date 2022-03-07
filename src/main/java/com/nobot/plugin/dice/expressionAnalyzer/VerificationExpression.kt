@@ -191,7 +191,7 @@ class VerificationExpression(
 			}
 			else -> this.skillName = skillName
 		}
-		this.skillNum=skillNum?:(getSkillNum(skillName)?:throw ExpressionException(resourceExpression,"未在任何地方检测到技能数值"))
+		this.skillNum=skillNum?:(getSkillNum(skillName)?:throw ExpressionException(resourceExpression,"未在任何地方检测到技能数值",null,null))
 	}
 
 	private fun getSkillNum(skillName: String):Int? =

@@ -10,9 +10,9 @@ import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
 import com.nobot.plugin.dice.expressionAnalyzer.*;
 import com.nobot.plugin.dice.service.COCCardService;
-import com.nobot.plugin.dice.service.StringFormatHelper;
 import com.nobot.system.annotation.UnzipFile;
 import com.nobot.system.stringHelper.DefaultStringFile;
+import com.nobot.system.stringHelper.GetString;
 import net.sourceforge.jeval.Evaluator;
 
 import javax.inject.Inject;
@@ -21,14 +21,14 @@ import java.util.Random;
 @GroupController
 @PrivateController
 @EventListener
-@UnzipFile(name="DiceString.properties",aim = "./String/DiceString.properties")
+@UnzipFile(name="string/DiceString.properties",aim = "./string/DiceString.properties")
 @DefaultStringFile(value = "./String/DiceString.properties",info = "这是检定和掷骰的类")
 public class Controller implements SpecialSymbol
 {
 	@Inject
 	private COCCardService service;
 	@Inject
-	private StringFormatHelper stringFormatHelper;
+	private GetString getString;
 
 	private Evaluator evaluator=new Evaluator();
 	private Random random=new Random();
@@ -72,43 +72,73 @@ public class Controller implements SpecialSymbol
 				builder=new StringBuilder().append(symbol_d);
 		}
 		else isH=false;
-		int time=getRepeat(builder);
-		deleteRepeat(builder);
+
+		int indexOfPound=builder.indexOf("#");
+		int repeatTime;
+		if(indexOfPound<=0)
+			repeatTime=1;
+		else
+			repeatTime=Integer.parseInt(builder.substring(0,indexOfPound));
+		builder.delete(0,indexOfPound+1);
+
 		Expression expression;
 
 		if(builder.charAt(0)==symbol_a)
 		{
 			if(builder.length()!=1)
 				builder.deleteCharAt(0);
-			else throw new ExpressionException(d,"判定表达式为空");
+			else throw new ExpressionException(d,"判定表达式为空",qq.getId(),group.getId());
 			expression=new VerificationExpression(
 					builder.toString(),random,service.getSkillMap(qq.getId(),group.getId()),group.getId());
 		}
 		else
 			expression=new NumberExpression(evaluator,random,builder.toString());
 
-		StringBuilder test=new StringBuilder();
-		for (int i=0;i<time;i++)
+		StringBuilder collectionString=new StringBuilder();
+		String resourceString = null,showString=null,resultString=null;
+		for (int i=0;i<repeatTime;i++)
 		{
 			expression.calculation();
-			test.append(stringFormatHelper.getFormat(expression, qq.getName())).append('\n');
+			resourceString=expression.getResourceExpression();
+			showString=expression.getShowExpression();
+			resultString= String.valueOf(expression.getResult());
+			collectionString.append(resourceString).append('=')
+					.append(showString).append('=')
+					.append(resultString).append('\n');
 		}
+		collectionString.deleteCharAt(collectionString.length()-1);
 
 		if(isH)
 		{
-			qq.sendMessage(test.toString());
-			return qq.getName()+"进行了一次暗骰";
+			qq.sendMessage(getString.formatString(
+					getString.addressing(repeatTime>1?"r.private.repeatedly.private":"r.private.single.private"),
+					qq.getName(),
+					group==null?"":group.getName(),
+					resourceString,
+					showString,
+					resultString,
+					collectionString.toString()));
+			return getString.formatString(
+					getString.addressing(repeatTime>1?"r.private.repeatedly.group":"r.private.single.group"),
+					qq.getName(),
+					group==null?"":group.getName(),
+					resourceString,
+					showString,
+					resultString,
+					collectionString.toString());
 		}
 		else
-			return test.toString();
-	}
-
-	private StringBuilder deleteRepeat(StringBuilder builder)
-	{
-		int index=builder.indexOf("#");
-		if(index>=0)
-			builder.delete(0,index+1);
-		return builder;
+		{
+			return getString.formatString(
+					getString.addressing(repeatTime>1?"r.public.single":"r.public.repeatedly"),
+					qq.getName(),
+					group==null?"":group.getName(),
+					resourceString,
+					showString,
+					resourceString,
+					collectionString.toString()
+			);
+		}
 	}
 
 	private int getRepeat(StringBuilder builder)
@@ -127,8 +157,14 @@ public class Controller implements SpecialSymbol
 		return "不识别的数字";
 	}
 	@Catch(error = ExpressionException.class)
-	public void wrongExpression(ExpressionException exception)
+	public String wrongExpression(ExpressionException exception)
 	{
-		System.out.println("?!");
+		return getString.formatString(
+				getString.formatString("r.error"),
+				String.valueOf(exception.getUserNum()),
+				String.valueOf(exception.getGroupNum()),
+				exception.getExpression(),
+				"","","",
+				exception.getInfo());
 	}
 }

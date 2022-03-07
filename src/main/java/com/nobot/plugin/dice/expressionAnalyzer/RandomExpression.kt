@@ -172,16 +172,16 @@ class RandomExpression @Throws(ExpressionException::class) constructor(private v
 							diceDownLimit = getInteger(i - 1) ?: 1
 							diceUpperLimit = getInteger(i + 1) ?: 100
 						}
-						else -> throw ExpressionException(resource, "无法识别的控制符号：$`object`")
+						else -> throw ExpressionException(resource, "无法识别的控制符号：$`object`",null,null)
 					}
 				}
 			}
 			//		获得正式的奖励或者惩罚数量，两者相互抵消，检测是否是百分骰
 			bonusOrPunishNum = bonusNum - punishNum
 			if ((diceDownLimit != 1 || diceUpperLimit != 100 || diceNum != 1) && bonusOrPunishNum != 0)
-				throw ExpressionException(resource, "非单独一个百分骰不启用b和p控制符号")
+				throw ExpressionException(resource, "非单独一个百分骰不启用b和p控制符号",null,null)
 			//		获得正式的取大或者取小值，同时存在报错，检测是否取值超过了总值
-			if (bigDiceNum != 0 && smallDiceNum != 0) throw ExpressionException(resource, "同时存在k和q控制符")
+			if (bigDiceNum != 0 && smallDiceNum != 0) throw ExpressionException(resource, "同时存在k和q控制符",null,null)
 			when
 			{
 				bigDiceNum > 0 -> maxOrMinNum = bigDiceNum
@@ -190,7 +190,7 @@ class RandomExpression @Throws(ExpressionException::class) constructor(private v
 			if (abs(maxOrMinNum) > diceNum) throw ExpressionException(
 				resource,
 				"取最" + (if (maxOrMinNum > 0) '大' else '小') + "骰子数目超出总数目"
-			)
+				,null,null)
 		}
 		else
 		{
@@ -201,7 +201,7 @@ class RandomExpression @Throws(ExpressionException::class) constructor(private v
 			}
 			catch (e: NumberFormatException)
 			{
-				throw ExpressionException(resource, "不存在D时无法使用其他修饰符")
+				throw ExpressionException(resource, "不存在D时无法使用其他修饰符",null,null)
 			}
 		}
 	}

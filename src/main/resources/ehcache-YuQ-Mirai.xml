@@ -26,6 +26,7 @@
         name="StringCache"
         eternal="false"
         timeToIdleSeconds="600"
+        timeToLiveSeconds="1200"
         maxElementsInMemory="30"
     />
 

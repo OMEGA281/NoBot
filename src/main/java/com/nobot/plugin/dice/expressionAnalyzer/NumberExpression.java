@@ -90,7 +90,7 @@ public class NumberExpression implements Expression
 		}
 		catch (EvaluationException e)
 		{
-			throw new ExpressionException(expression,e.getMessage());
+			throw new ExpressionException(expression,e.getMessage(),null,null);
 		}
 	}
 

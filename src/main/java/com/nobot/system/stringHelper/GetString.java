@@ -32,8 +32,11 @@ public class GetString
 			for(StackTraceElement stackTraceElement:Thread.currentThread().getStackTrace())
 			{
 				String name=stackTraceElement.getClassName();
-				if(!name.equals(this.getClass().getName()))
-					className=name;
+				if(!(name.equals(this.getClass().getName())||name.equals(Thread.class.getName())))
+				{
+					className = name;
+					break;
+				}
 			}
 			fileName=stringFileMap.get(className);
 			textName=address;
@@ -69,15 +72,21 @@ public class GetString
 					startIndex=index;
 					StringBuilder builder=new StringBuilder();
 					index++;
-					for (char num=string.charAt(index);'0'<=num&&num<='9';num=string.charAt(index),index++)
+					for(char num=string.charAt(index);'0'<=num&&num<='9';)
+					{
 						builder.append(num);
+						index++;
+						if(index<string.length())
+							num=string.charAt(index);
+						else break;
+					}
 					endIndex=index;
 					int argIndex=Integer.parseInt(builder.toString());
 					String replaceText;
 					if(argIndex>=args.length||argIndex<0)
 						replaceText="NULL";
 					else
-						replaceText=args[argIndex];
+						replaceText=args[argIndex-1];
 					string.replace(startIndex,endIndex,replaceText);
 					index=startIndex+replaceText.length();
 					continue;
