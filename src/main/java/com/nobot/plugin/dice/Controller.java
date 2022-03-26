@@ -130,12 +130,12 @@ public class Controller implements SpecialSymbol
 		else
 		{
 			return getString.formatString(
-					getString.addressing(repeatTime>1?"r.public.single":"r.public.repeatedly"),
+					getString.addressing(repeatTime>1?"r.public.repeatedly":"r.public.single"),
 					qq.getName(),
 					group==null?"":group.getName(),
 					resourceString,
 					showString,
-					resourceString,
+					resultString,
 					collectionString.toString()
 			);
 		}

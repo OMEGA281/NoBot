@@ -83,7 +83,7 @@ public class GetString
 					endIndex=index;
 					int argIndex=Integer.parseInt(builder.toString());
 					String replaceText;
-					if(argIndex>=args.length||argIndex<0)
+					if(argIndex>args.length||argIndex<0)
 						replaceText="NULL";
 					else
 						replaceText=args[argIndex-1];
