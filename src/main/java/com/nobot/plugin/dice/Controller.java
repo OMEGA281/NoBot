@@ -110,7 +110,11 @@ public class Controller implements SpecialSymbol
 
 		if(isH)
 		{
-			qq.sendMessage(getString.formatString(
+			if(builder.charAt(0)==symbol_a)
+			{
+				((VerificationExpression)expression).
+			}
+			else qq.sendMessage(getString.formatString(
 					getString.addressing(repeatTime>1?"r.private.repeatedly.private":"r.private.single.private"),
 					qq.getName(),
 					group==null?"":group.getName(),

@@ -6,7 +6,9 @@ import lombok.var;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Random;
 
 public class GetString
 {
@@ -16,6 +18,8 @@ public class GetString
 
 	@Inject
 	private StringFileMap stringFileMap;
+
+	private Random random;
 
 	public String addressing(String address)
 	{
@@ -55,7 +59,22 @@ public class GetString
 			}
 			ehcache.set(fileName,properties);
 		}
-		return properties.getProperty(textName,"不存在的字符串索引！");
+		ArrayList<String> stringList=new ArrayList<>();
+		String mainString=properties.getProperty(textName);
+		if(mainString!=null)
+		{
+			stringList.add(mainString);
+			for(;;)
+			{
+				textName=textName+"[";
+				String subString=properties.getProperty(textName);
+				if(subString==null)
+					break;
+				else
+					stringList.add(subString);
+			}
+		}
+		return stringList.size()==1?stringList.get(0):stringList.get(random.nextInt(stringList.size()));
 	}
 
 	public String formatString(String text,String...args)
