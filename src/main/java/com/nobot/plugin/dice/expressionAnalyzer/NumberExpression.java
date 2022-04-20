@@ -15,7 +15,6 @@ import java.util.Random;
 public class NumberExpression implements Expression
 {
 	private Evaluator evaluator;
-	private Random random;
 	private String expression;
 
 	@Getter
@@ -29,7 +28,6 @@ public class NumberExpression implements Expression
 	public NumberExpression(Evaluator evaluator, Random random, String expression) throws ExpressionException
 	{
 		this.evaluator=evaluator;
-		this.random=random;
 		this.expression=expression;
 		var chars=expression.toCharArray();
 		var builder=new StringBuilder();

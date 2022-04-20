@@ -72,19 +72,18 @@ class VerificationExpression(
 		val normalSuccess = skillNum
 		val hardSuccess = normalSuccess / 2
 		val extremeSuccess = normalSuccess / 5
-		when
+		successLevel=when(resultValue)
 		{
-			resultValue <= extremeSuccess -> successLevel = if (difficult == 2) 1 else 3
-			resultValue <= hardSuccess ->
-			{
-				when (difficult)
+			in 0..extremeSuccess -> if (difficult == 2) 1 else 3
+			in 0..hardSuccess -> when (difficult)
 				{
-					0 -> successLevel = 2
-					1 -> successLevel = 1
-					2 -> successLevel = 0
+					0 -> 2
+					1 -> 1
+					2 -> 0
+					else ->0
 				}
-			}
-			resultValue <= normalSuccess -> successLevel = if (difficult == 0) 1 else 0
+			in 0..normalSuccess -> if (difficult == 0) 1 else 0
+			else -> 0
 		}
 		isExSuccess = VerificationSpecialTask.isExSuccess(groupNum, skillNum, resultValue, successLevel)
 		isExFail = VerificationSpecialTask.isExFail(groupNum, skillNum, resultValue, successLevel)

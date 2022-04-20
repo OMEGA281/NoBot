@@ -106,7 +106,7 @@ public class Controller implements SpecialSymbol
 				bonusAndPunish="normal";
 
 			String[] args=new String[14];
-			args[0]=group==null?qq.getName():((Member)qq).getNameCard();
+			args[0]=qq.getName();
 			args[1]=group==null?"":group.getName();
 			args[2]=expression.getSkillName();
 			args[3]= String.valueOf(expression.getSkillNum());
@@ -123,32 +123,40 @@ public class Controller implements SpecialSymbol
 			args[10]=getSuccessStateString(expression.getSuccessLevel());
 			args[11]=expression.isExSuccess()?"大成功":expression.isExFail()?"大失败":"";
 			StringBuilder stringBuilder=new StringBuilder();
-			for (int i=0;i<repeatTime;i++)
-			{
-				stringBuilder.append("rd100=").append(args[4]);
-				if (expression.getBonusOrPunishDiceNum() != 0)
-					stringBuilder.append('{').append(args[5]).append("骰:").append(args[7]).append("}->")
-							.append(args[9]).append(args[10]);
-				if (expression.isExFail() || expression.isExSuccess())
-					stringBuilder.append(args[11]);
-				stringBuilder.append("\r\n");
 
+			stringBuilder.append("rd100=").append(args[4]);
+			if (expression.getBonusOrPunishDiceNum() != 0)
+				stringBuilder.append('{').append(args[5]).append("骰:").append(args[7]).append("}->")
+						.append(args[9]).append('/').append(args[3]).append(args[10]);
+			if (expression.isExFail() || expression.isExSuccess())
+				stringBuilder.append(args[11]);
+			stringBuilder.append("\r\n");
+
+			for (int i=1;i<repeatTime;i++)
+			{
 				expression.calculation();
 				args[4]= expression.getTrueExpression();
 				args[7]=linkArray(expression.getExtraDice());
 				args[9]= String.valueOf(expression.getResult());
 				args[10]=getSuccessStateString(expression.getSuccessLevel());
 				args[11]=expression.isExSuccess()?"大成功":expression.isExFail()?"大失败":"";
+
+				stringBuilder.append("rd100=").append(args[4]);
+				if (expression.getBonusOrPunishDiceNum() != 0)
+					stringBuilder.append('{').append(args[5]).append("骰:").append(args[7]).append("}->")
+							.append(args[9]).append('/').append(args[3]).append(args[10]);
+				if (expression.isExFail() || expression.isExSuccess())
+					stringBuilder.append(args[11]);
+				stringBuilder.append("\r\n");
 			}
 			args[12]=stringBuilder.toString();
 
 			StringBuilder templateString=new StringBuilder();
 
-			templateString.append(getString.addressing("ra."+(repeatTime>1?"repeatedly":"single")+bonusAndPunish));
+			templateString.append(getString.addressing("ra."+(repeatTime>1?"repeatedly.":"single.")+bonusAndPunish));
 			if(repeatTime==1)
 			{
-				templateString.append(getString.addressing("ra.single."+bonusAndPunish))
-						.append(getString.addressing("ra.main."+bonusAndPunish));
+				templateString.append(getString.addressing("ra.main."+bonusAndPunish));
 				switch (expression.getSuccessLevel())
 				{
 					case 0:templateString.append(getString.addressing("ra.state.fail"));break;
@@ -216,7 +224,7 @@ public class Controller implements SpecialSymbol
 			args[5]=stringBuilder.toString();
 
 			String templateString;
-			if(!args[6].isEmpty())
+			if(!(args[6]==null||args[6].isEmpty()))
 				templateString=getString.addressing("r.error");
 			else
 			{
@@ -236,15 +244,14 @@ public class Controller implements SpecialSymbol
 
 	private String linkArray(int[] args)
 	{
-		if(args.length>0)
+		if(args.length<1)
 			return "";
 		StringBuilder builder = new StringBuilder();
 
-		StringBuilder stringBuilder=new StringBuilder();
 		for (int i:args)
 			builder.append(i).append(",");
 		builder.deleteCharAt(builder.length()-1);
-		return stringBuilder.toString();
+		return builder.toString();
 	}
 
 	private String getSuccessStateString(int successLevel)
