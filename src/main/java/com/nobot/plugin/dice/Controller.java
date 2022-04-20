@@ -181,7 +181,7 @@ public class Controller implements SpecialSymbol
 			{
 				qq.sendMessage(resultString);
 				return getString.formatString(
-						getString.addressing("ra.private.group."+(repeatTime==1?"single":"repeatedly")));
+						getString.addressing("ra.private.group."+(repeatTime==1?"single":"repeatedly")),args);
 			}
 			else
 				return resultString;
@@ -199,18 +199,16 @@ public class Controller implements SpecialSymbol
 				args[6]=e.getInfo();
 			}
 
-
 			args[0]=group==null?qq.getName():((Member)qq).getNameCard();
+			if(args[0].isEmpty()) args[0]=qq.getName();
 			args[1]=args[1]=group==null?"":group.getName();
 			args[2]=expression.getResourceExpression();
 			args[3]=expression.getShowExpression();
 			args[4]= String.valueOf(expression.getResult());
 			StringBuilder stringBuilder=new StringBuilder();
-			int i=0;
-			do
+			stringBuilder.append(args[2]).append('=').append(args[3]).append('=').append(args[4]).append('\n');
+			for(int i=1;i<repeatTime;i++)
 			{
-				stringBuilder.append(args[2]).append('=').append(args[3]).append('=').append(args[4]).append('\n');
-				i++;
 				try
 				{
 					expression.calculation();
@@ -219,7 +217,11 @@ public class Controller implements SpecialSymbol
 				{
 					args[6]=e.getInfo();
 				}
-			}while (repeatTime>i);
+				args[2]=expression.getResourceExpression();
+				args[3]=expression.getShowExpression();
+				args[4]= String.valueOf(expression.getResult());
+				stringBuilder.append(args[2]).append('=').append(args[3]).append('=').append(args[4]).append('\n');
+			}
 			stringBuilder.deleteCharAt(stringBuilder.length()-1);
 			args[5]=stringBuilder.toString();
 
