@@ -39,7 +39,8 @@ class VerificationExpression(
 	override fun calculation()
 	{
 		originalValue = random.nextInt(100) + 1
-		for (i in extraDice.indices) extraDice[i] = random.nextInt(10)
+//		为了避免当个位数是0的时候，奖励骰同样是0的时候，出现00的情况
+		for (i in extraDice.indices) extraDice[i] = random.nextInt(10)+if(originalValue%10==0) 1 else 0
 		when
 		{
 			bonusOrPunishDiceNum < 0 ->
