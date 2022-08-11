@@ -8,7 +8,10 @@ import com.icecreamqaq.yuq.entity.Contact;
 import com.icecreamqaq.yuq.entity.Friend;
 import com.icecreamqaq.yuq.entity.Group;
 import com.icecreamqaq.yuq.entity.Member;
-import com.nobot.plugin.dice.expressionAnalyzer.*;
+import com.nobot.plugin.dice.expressionAnalyzer.ExpressionException;
+import com.nobot.plugin.dice.expressionAnalyzer.NumberExpression;
+import com.nobot.plugin.dice.expressionAnalyzer.SpecialSymbol;
+import com.nobot.plugin.dice.expressionAnalyzer.VerificationExpression;
 import com.nobot.plugin.dice.service.COCCardService;
 import com.nobot.system.annotation.UnzipFile;
 import com.nobot.system.stringHelper.DefaultStringFile;
@@ -16,7 +19,6 @@ import com.nobot.system.stringHelper.GetString;
 import net.sourceforge.jeval.Evaluator;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.Arrays;
 import java.util.Random;
 

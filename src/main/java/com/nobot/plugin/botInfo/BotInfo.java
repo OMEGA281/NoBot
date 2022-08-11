@@ -13,7 +13,7 @@ import com.icecreamqaq.yuq.event.SendMessageEvent;
 import com.icecreamqaq.yuq.message.Message;
 import com.icecreamqaq.yuq.message.MessageItemFactory;
 import com.icecreamqaq.yuq.message.MessageLineQ;
-import com.nobot.plugin.botInfo.Service.GroupStateService;
+import com.nobot.plugin.botInfo.service.GroupStateService;
 import com.nobot.system.GetResource;
 import com.nobot.system.annotation.CreateFile;
 import com.nobot.tool.FileUtils;

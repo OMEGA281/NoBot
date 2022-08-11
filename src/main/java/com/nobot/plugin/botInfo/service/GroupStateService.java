@@ -1,4 +1,4 @@
-package com.nobot.plugin.botInfo.Service;
+package com.nobot.plugin.botInfo.service;
 
 import com.icecreamqaq.yudb.jpa.annotation.Transactional;
 import com.nobot.plugin.botInfo.dao.GlobalSettingDAO;

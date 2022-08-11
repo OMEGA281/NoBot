@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<settings>
+<!--    bot刚入群之后的默认状态\，true为开启，false为关闭-->
+    <setting name="GROUP_SLEEP_MODE">false</setting>
+<!--    决定关于bot对于发言回应的严格程度：-->
+<!--    0为回应任何人-->
+<!--    1为不回应黑名单中的人-->
+<!--    2为只回应白名单中的人-->
+<!--    3为只回应OP-->
+<!--    4为不回应任何人-->
+    <setting name="STRICTNESS">1</setting>
+</settings>

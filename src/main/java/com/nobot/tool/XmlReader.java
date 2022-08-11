@@ -13,6 +13,12 @@ public class XmlReader
 {
 	SAXBuilder saxBuilder = new SAXBuilder();
 
+	public Document getDocument(String path) throws IOException, JDOMException
+	{
+		File file=new File(path);
+		return getDocument(file);
+	}
+
 	public Document getDocument(File file) throws JDOMException, IOException
 	{
 		return saxBuilder.build(file);
