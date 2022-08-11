@@ -1,6 +1,7 @@
 package com.nobot.system;
 
 import com.IceCreamQAQ.Yu.annotation.Config;
+import com.nobot.tool.fileHelper.FileOrFolderHasExistException;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -43,15 +44,15 @@ public class GetResource
 	 *
 	 * @return 是否发生替换。未覆盖、错误、源文件不存在都会返回false
 	 */
-	public boolean extractFile(String insideFile,String outSideFile,boolean cover)
+	public boolean extractFile(String insideFile,String outSideFile,boolean cover) throws FileNotFoundException, FileOrFolderHasExistException
 	{
 		InputStream inputStream = gerJarResource(insideFile);
 		if (inputStream == null)
-			return false;
+			throw new FileNotFoundException(insideFile);
 
 		File file = getOutsideResource(outSideFile);
 		if(file!=null&&!cover)
-			return false;
+			throw new FileOrFolderHasExistException(true,file.isFile(),outSideFile);
 
 		file=new File(outSideFile);
 		String fileAbsolutePath=file.getAbsolutePath();
