@@ -22,6 +22,12 @@ public class FileUtils
 		inputStream.close();
 	}
 
+	public String readAll(String path)throws IOException
+	{
+		File file=new File(path);
+		return readAll(file);
+	}
+
 	public String readAll(File file)throws IOException
 	{
 		if(!file.exists())

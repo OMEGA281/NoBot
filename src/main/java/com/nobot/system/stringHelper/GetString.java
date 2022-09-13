@@ -115,4 +115,10 @@ public class GetString
 		}
 		return string.toString();
 	}
+
+	public String addressAndFormat(String address,String...args)
+	{
+		String s=addressing(address);
+		return formatString(s,args);
+	}
 }

@@ -1,6 +1,7 @@
 package com.nobot.plugin.systemController.service;
 
 import com.icecreamqaq.yudb.jpa.annotation.Transactional;
+import com.nobot.plugin.systemController.dao.AdministratorsDAO;
 import com.nobot.plugin.systemController.dao.BlackUserDAO;
 import com.nobot.plugin.systemController.dao.WhiteUserDAO;
 import com.nobot.plugin.systemController.entity.BlackUser;
@@ -14,6 +15,8 @@ public class BlackAndWhiteListService
 	private BlackUserDAO blackUserDAO;
 	@Inject
 	private WhiteUserDAO whiteUserDAO;
+	@Inject
+	private AdministratorsDAO administratorsDAO;
 
 	@Transactional
 	public boolean isUserInBlackList(long userNum,long groupNum)
@@ -61,5 +64,10 @@ public class BlackAndWhiteListService
 	public boolean removeUserFromWhiteList(long userNum,long groupNum)
 	{
 		return whiteUserDAO.removeByUserNumAndGroupNum(userNum,groupNum)!=null;
+	}
+
+	public boolean isOP(long num)
+	{
+		return administratorsDAO.getOP().contains(num) || administratorsDAO.getSOP() == num;
 	}
 }

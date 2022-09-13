@@ -30,7 +30,7 @@ public class GroupSleepService
 	}
 
 	@Transactional
-	public void setGroupSleepMode(long groupNum,boolean isActive)
+	public boolean setGroupSleepMode(long groupNum,boolean isActive)
 	{
 		GroupSleepMode groupSleepMode=groupSleepModeDAO.findByID(groupNum);
 		if(groupSleepMode==null)
@@ -44,8 +44,9 @@ public class GroupSleepService
 			if(groupSleepMode.isActive!=isActive)
 				groupSleepMode.setActive(isActive);
 			else
-				return;
+				return false;
 		}
 		groupSleepModeDAO.saveOrUpdate(groupSleepMode);
+		return true;
 	}
 }

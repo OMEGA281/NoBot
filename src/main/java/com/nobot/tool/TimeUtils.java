@@ -14,7 +14,7 @@ public class TimeUtils
 	{
 		return simpleDateFormat.format(new Date(getNowTimeStamp()));
 	}
-	public String getTimeLengthString(long time,boolean reservedMillisecond)
+	public static String getTimeLengthString(long time,boolean reservedMillisecond)
 	{
 		long surplus=time;
 		long millisecond=surplus%1000;
